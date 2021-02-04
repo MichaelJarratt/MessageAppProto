@@ -1,0 +1,6 @@
+C:\Users\Michael\source\repos\MessageApp\MessageApp\bin\Debug\netcoreapp3.1\MessageApp.exe
+C:\Users\Michael\source\repos\MessageApp\MessageApp\obj\Debug\netcoreapp3.1\MessageApp.csprojAssemblyReference.cache
+C:\Users\Michael\source\repos\MessageApp\MessageApp\obj\Debug\netcoreapp3.1\MessageApp.AssemblyInfoInputs.cache
+C:\Users\Michael\source\repos\MessageApp\MessageApp\obj\Debug\netcoreapp3.1\MessageApp.AssemblyInfo.cs
+C:\Users\Michael\source\repos\MessageApp\MessageApp\bin\Debug\netcoreapp3.1\PacketDotNet.dll
+C:\Users\Michael\source\repos\MessageApp\MessageApp\obj\Debug\netcoreapp3.1\MessageApp.csproj.CopyComplete

@@ -1,0 +1,13 @@
+{
+  "version": 2,
+  "dgSpecHash": "8+9d1aNkINCsgqENSXMf9aXnAnBDqv2Zdqhec4X4WYQiO7lAk4Kjfe/EyH1mqUEFpL0tYfcETM+5jefGRmBCkg==",
+  "success": true,
+  "projectFilePath": "D:\\programs\\C#\\MessageAppProto\\MessageApp\\MessageApp.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\Michael\\.nuget\\packages\\packetdotnet\\1.2.0\\packetdotnet.1.2.0.nupkg.sha512",
+    "C:\\Users\\Michael\\.nuget\\packages\\sharppcap\\5.4.0\\sharppcap.5.4.0.nupkg.sha512",
+    "C:\\Users\\Michael\\.nuget\\packages\\system.memory\\4.5.4\\system.memory.4.5.4.nupkg.sha512",
+    "C:\\Users\\Michael\\.nuget\\packages\\system.runtime.compilerservices.unsafe\\4.7.0\\system.runtime.compilerservices.unsafe.4.7.0.nupkg.sha512"
+  ],
+  "logs": []
+}
