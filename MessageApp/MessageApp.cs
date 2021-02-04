@@ -18,8 +18,9 @@ namespace MessageApp
         public IPEndPoint localEndPoint; //ip/port combo to listen to
         //will need a target EndPoint too
 
-        private Socket holePunchSocket; //socket used to hole punch the NAT
+        private HolePuncher holePuncher; //class used to hole punch the NAT
         private IPEndPoint holePunchEndpoint; //endpoint to send packet to when punching hole
+
 
         public void MainLoop()
         {
@@ -146,32 +147,11 @@ namespace MessageApp
             return listener;
         }
 
+        //creates and utilises an instance of HolePuncher to punch NAT holes
         private void holePunchSetup()
         {
-            holePunchEndpoint = new IPEndPoint(IPAddress.Parse("8.8.8.8"), localPortNo); //creates endpoint for google DNS server, I think it sgould leave via localPortNo
-            holePunchSocket = new Socket(holePunchEndpoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp); //creates the socket to deal with it
-
-
-            System.Timers.Timer aTimer = new System.Timers.Timer();
-            //aTimer.Elapsed += new ElapsedEventHandler(punchHole); //trigges method every <interval>
-            //aTimer.Interval = 1000; //interval is in miliseconds
-            //aTimer.Enabled = true; //activates it
-            //aTimer.Start();
-        }
-        private void punchHole(Object sender, EventArgs e)
-        {
-            try
-            {
-                //holePunchSocket.Connect(holePunchEndpoint); //send out packet, which punches hole in NAT
-                new Socket(holePunchEndpoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp).Connect(holePunchEndpoint);
-            }
-            catch (SocketException except) //expected failed to connect error
-            {
-                if (except.ErrorCode != 10060) //if the error is not failed to connect
-                {
-                    throw except; //throw exception so more information can be gleamed
-                }
-            }
+            holePuncher = new HolePuncher(65432, "109.151.183.163"); //src/dest ports both = 65432 and will send them to supplied IP
+            holePuncher.startHolePunching(1000); //punch hole every second
         }
 
         //entry point

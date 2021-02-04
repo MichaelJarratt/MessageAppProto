@@ -15,8 +15,8 @@ namespace MessageApp
         private ushort localPort;
         private ushort destPort;
         private IPAddress destAddress;
-        private IPAddress srcAddress = IPAddress.Parse("local"); //ip of NIC this machine is using to get to the gateway
-        private PhysicalAddress destMAC = PhysicalAddress.Parse("gateway MAC"); //MAC of the network gateway
+        private IPAddress srcAddress = IPAddress.Parse("192.168.1.199"); //ip of NIC this machine is using to get to the gateway
+        private PhysicalAddress destMAC = PhysicalAddress.Parse("78-65-59-BE-3D-B7"); //MAC of the network gateway
         private EthernetPacket ethernetPacket; //this is the packer containing the payload TCP packet that is sent to the gateway
 
         private ICaptureDevice device;
@@ -29,6 +29,7 @@ namespace MessageApp
             localPort = Convert.ToUInt16(port);
             destPort = Convert.ToUInt16(port);
             this.destAddress = IPAddress.Parse(garbageAddress); //takes string parameter and parses it into IP object
+            init();
         }
         //constructor takes local and target port seperately, incase that's ever needed for whatever reason
         public HolePuncher (int localPort, int destPort, string garbageAddress)
@@ -36,6 +37,7 @@ namespace MessageApp
             this.localPort = Convert.ToUInt16(localPort);
             this.destPort = Convert.ToUInt16(destPort);
             this.destAddress = IPAddress.Parse(garbageAddress); //takes string parameter and parses it into IP object
+            init();
         }
 
         //tasks used by each constructor path
@@ -116,5 +118,4 @@ namespace MessageApp
             return null;
         }
     }
-}
 }

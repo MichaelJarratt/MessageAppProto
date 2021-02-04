@@ -1,0 +1,80 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v3.1",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v3.1": {
+      "MessageApp/1.0.0": {
+        "dependencies": {
+          "PacketDotNet": "1.2.0",
+          "SharpPcap": "5.4.0"
+        },
+        "runtime": {
+          "MessageApp.dll": {}
+        }
+      },
+      "PacketDotNet/1.2.0": {
+        "dependencies": {
+          "System.Runtime.CompilerServices.Unsafe": "4.7.0"
+        },
+        "runtime": {
+          "lib/netstandard2.0/PacketDotNet.dll": {
+            "assemblyVersion": "1.2.0.0",
+            "fileVersion": "1.2.0.0"
+          }
+        }
+      },
+      "SharpPcap/5.4.0": {
+        "dependencies": {
+          "PacketDotNet": "1.2.0",
+          "System.Memory": "4.5.4"
+        },
+        "runtime": {
+          "lib/netstandard2.0/SharpPcap.dll": {
+            "assemblyVersion": "5.4.0.0",
+            "fileVersion": "5.4.0.0"
+          }
+        }
+      },
+      "System.Memory/4.5.4": {},
+      "System.Runtime.CompilerServices.Unsafe/4.7.0": {}
+    }
+  },
+  "libraries": {
+    "MessageApp/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "PacketDotNet/1.2.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-lse8dxIjyZ7QzC7ua0YBfDZywDovkhr1BZ9J2erxUNdyrCoQsbI74JPnZfEiODIzoWmkRmkz76zZU4mguHc2zQ==",
+      "path": "packetdotnet/1.2.0",
+      "hashPath": "packetdotnet.1.2.0.nupkg.sha512"
+    },
+    "SharpPcap/5.4.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-ND3G6Q+WW3nZ0kfE5U8Tsy1TY2ybn5oQCvPBp5Pd9bycdHt1SrAVzpmga6J1qO0Fm58XhYrSMIfKcclWqo5Meg==",
+      "path": "sharppcap/5.4.0",
+      "hashPath": "sharppcap.5.4.0.nupkg.sha512"
+    },
+    "System.Memory/4.5.4": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-1MbJTHS1lZ4bS4FmsJjnuGJOu88ZzTT2rLvrhW7Ygic+pC0NWA+3hgAen0HRdsocuQXCkUTdFn9yHJJhsijDXw==",
+      "path": "system.memory/4.5.4",
+      "hashPath": "system.memory.4.5.4.nupkg.sha512"
+    },
+    "System.Runtime.CompilerServices.Unsafe/4.7.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-IpU1lcHz8/09yDr9N+Juc7SCgNUz+RohkCQI+KsWKR67XxpFr8Z6c8t1iENCXZuRuNCc4HBwme/MDHNVCwyAKg==",
+      "path": "system.runtime.compilerservices.unsafe/4.7.0",
+      "hashPath": "system.runtime.compilerservices.unsafe.4.7.0.nupkg.sha512"
+    }
+  }
+}

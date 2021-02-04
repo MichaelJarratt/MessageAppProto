@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30523.141
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MessageAppProto", "MessageAppProto\MessageAppProto.csproj", "{D201A0A9-6921-4BCE-B34A-9EF36A8FF557}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MessageApp", "MessageApp\MessageApp.csproj", "{0F565F84-9C97-434B-9BDF-7FF52FFF9E49}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -11,10 +11,10 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{D201A0A9-6921-4BCE-B34A-9EF36A8FF557}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{D201A0A9-6921-4BCE-B34A-9EF36A8FF557}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{D201A0A9-6921-4BCE-B34A-9EF36A8FF557}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{D201A0A9-6921-4BCE-B34A-9EF36A8FF557}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0F565F84-9C97-434B-9BDF-7FF52FFF9E49}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0F565F84-9C97-434B-9BDF-7FF52FFF9E49}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0F565F84-9C97-434B-9BDF-7FF52FFF9E49}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0F565F84-9C97-434B-9BDF-7FF52FFF9E49}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
