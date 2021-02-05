@@ -125,15 +125,13 @@ namespace MessageApp
                 catch (SocketException e) //if there is an exception it's going to be that no socket received it
                 {
                     Console.WriteLine("Could not connect to target");
-                    Console.WriteLine(e.Message);
                     Console.WriteLine(e.ErrorCode);
+                    Console.WriteLine(e.Message);
                     //throw e;
                 }
 
             }
         }
-
-
 
         //sets up and returns a listener configured to listen to localPortNo
         private Socket setUpListener()
@@ -147,11 +145,21 @@ namespace MessageApp
             return listener;
         }
 
+        // THREAD //
+        /*
+         *  this simple method just spins an icon until listenToConsole has finishing trying to send a message
+         *  users don't like entering a command and then seeing nothing happen, this is just so sending a message feels better
+         */
+        private void showSendingIcon()
+        {
+            //honestly not worth the effort 
+        }
+
         //creates and utilises an instance of HolePuncher to punch NAT holes
         private void holePunchSetup()
         {
-            holePuncher = new HolePuncher(65432, "109.151.183.163"); //src/dest ports both = 65432 and will send them to supplied IP
-            holePuncher.startHolePunching(1000); //punch hole every second
+            holePuncher = new HolePuncher(65432, "86.29.29.12"); //src/dest ports both = 65432 and will send them to supplied IP
+            holePuncher.startHolePunching(10000); //punch hole every second
         }
 
         //entry point

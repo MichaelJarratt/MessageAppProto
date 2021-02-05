@@ -10,7 +10,7 @@ using Timer = System.Timers.Timer;
 
 namespace MessageApp
 {
-    class HolePuncher
+    class UDPHolePuncher
     {
         private ushort localPort;
         private ushort destPort;
@@ -23,8 +23,15 @@ namespace MessageApp
 
         Timer sendTimer;
 
+        static void Main(string[] args)
+        {
+            UDPHolePuncher hp = new UDPHolePuncher(65432, "86.29.29.12");
+            hp.startHolePunching(1000);
+            Console.ReadLine();
+        }
+
         //constructor takes port (local and target) and the address to send packets to
-        public HolePuncher (int port, string garbageAddress)
+        public UDPHolePuncher(int port, string garbageAddress)
         {
             localPort = Convert.ToUInt16(port);
             destPort = Convert.ToUInt16(port);
@@ -32,7 +39,7 @@ namespace MessageApp
             init();
         }
         //constructor takes local and target port seperately, incase that's ever needed for whatever reason
-        public HolePuncher (int localPort, int destPort, string garbageAddress)
+        public UDPHolePuncher(int localPort, int destPort, string garbageAddress)
         {
             this.localPort = Convert.ToUInt16(localPort);
             this.destPort = Convert.ToUInt16(destPort);
@@ -48,9 +55,11 @@ namespace MessageApp
             device.Open(); //opens device, whatever that means
 
             //TCP packet is the payload of the IP packet
-            TcpPacket tcpPacket = new TcpPacket(localPort, destPort); //creates empty packet and sets the source and destination ports <port>
-            tcpPacket.Flags = 0x02; //syn flag
-            tcpPacket.WindowSize = 64240;
+            //TcpPacket tcpPacket = new TcpPacket(localPort, destPort); //creates empty packet and sets the source and destination ports <port>
+            //tcpPacket.Flags = 0x02; //syn flag
+            //tcpPacket.WindowSize = 64240;
+            UdpPacket udpPacket = new UdpPacket(localPort, destPort); 
+            
 
 
             //IP packet delivers TCP packet as its payload. IP packet is the payload of the Ethernet packet going to the gateway
@@ -67,11 +76,11 @@ namespace MessageApp
 
             //matryoshka doll the packets
             ethernetPacket.PayloadPacket = ipPacket;
-            ipPacket.PayloadPacket = tcpPacket;
+            ipPacket.PayloadPacket = udpPacket;
             
             //this may need to be moved elsewhere incase time factors into the checksum
             ipPacket.Checksum = ipPacket.CalculateIPChecksum();
-            tcpPacket.Checksum = tcpPacket.CalculateTcpChecksum();
+            udpPacket.Checksum = udpPacket.CalculateUdpChecksum();
 
             sendTimer = new Timer();
             sendTimer.Elapsed += new ElapsedEventHandler(sendPacket); //method to be done every interval
