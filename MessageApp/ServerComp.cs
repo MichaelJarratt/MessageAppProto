@@ -4,6 +4,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace MessageApp
 {
@@ -13,6 +14,10 @@ namespace MessageApp
 
         private Socket connectionListener; //socker that listens for incoming connections
         private ManualResetEvent blockConnectionListenLoop; //blocks loop listening to connections until a connection is received
+        
+        Action<String> messageAppReturn; // Action can hold a reference to a method, this references the call back handler on MessageApp that prints the received message
+        //Action<String> is a void return method that takes one string. Action<String,String> takes two
+        //Func<String,String> is a String return method that takes one string. Func<String,String,String> takes two strings.
 
         public ServerComp()
         {
@@ -77,7 +82,7 @@ namespace MessageApp
         //handles receiving the bytes and then displaying the message when at <EOF>
         private void receiveBytes(IAsyncResult ar)
         {
-            Console.WriteLine("receive cycle");
+            //Console.WriteLine("receive cycle");
             //extract socket and buffer from argument
             BufferState bufferState = (BufferState)ar.AsyncState; //gets the buffer from the argument
             Socket receiveHandler = bufferState.socket; //between beginReceive and now the receiver has been getting bits
@@ -94,8 +99,9 @@ namespace MessageApp
                 {
                     messageString = messageString.Substring(0, messageString.Length - 5); //removes <EOF> tag
                     //Console.WriteLine($"--{content}--"); //print received message to console
-                    Console.WriteLine(messageString);
-                    Console.WriteLine();
+                    //Console.WriteLine(messageString);
+                    //Console.WriteLine();
+                    messageAppReturn(messageString);
                 }
                 else //transmission is still going but has not finished yet
                 {
@@ -108,9 +114,10 @@ namespace MessageApp
             //or when <EOF> were received
         }
 
-        private void processBytes()
-        {
 
+        public void setMessageCallback(Action<String> NewObj)
+        {
+            messageAppReturn = NewObj;
         }
     }
 
