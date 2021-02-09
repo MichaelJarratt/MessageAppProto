@@ -39,7 +39,7 @@ namespace MessageApp
 
         // THREAD //
         //pauses execution while listening for input, then establishes connection with server and sends message
-        private void mainLoop()
+        private void listenToConsoleLoop()
         {
             while (true)
             {
@@ -65,10 +65,10 @@ namespace MessageApp
         }
 
         //offers way to begin the main loop
-        public void startMainLoop()
+        public void startListenToConsoleLoop()
         {
-            Thread mainLoopThread = new Thread(mainLoop);
-            mainLoopThread.Start();
+            Thread listenToConsoleLoopThread = new Thread(listenToConsoleLoop);
+            listenToConsoleLoopThread.Start();
         }
     }
 }

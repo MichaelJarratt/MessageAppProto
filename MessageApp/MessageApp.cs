@@ -22,31 +22,34 @@ namespace MessageApp
 
         public void MainLoop()
         {
-            Socket listener = setUpListener(); //gets listener that listens for any incoming TCP requests from any network interface for port <localPortNo>
+            //Socket listener = setUpListener(); //gets listener that listens for any incoming TCP requests from any network interface for port <localPortNo>
             //Thread consoleInput = new Thread(listenToConsole); //listenToConsole becmes a thread and can act independently of main thread
             //consoleInput.Start(); //starts thread to listen to console input
             ClientComp clientComp = new ClientComp(targetIP.ToString());
-            
+            ServerComp serverComp = new ServerComp();
 
 
-            listener.Bind(localEndPoint); //tells listener to listen to ip/port combo
-            listener.Listen(10); //sockets starts listening and will queue up to 10 requests to be serviced
+
+            //listener.Bind(localEndPoint); //tells listener to listen to ip/port combo
+            //listener.Listen(10); //sockets starts listening and will queue up to 10 requests to be serviced
 
             Console.WriteLine($"Listening on port {localPortNo}");
-            Console.WriteLine($"Listening on IP {localEndPoint.Address}");
+            //Console.WriteLine($"Listening on IP {localEndPoint.Address}");
+            Console.WriteLine($"Listening on IP <all interfaces>");
             Console.WriteLine($"Sending to port {targetPortNo}");
             Console.WriteLine($"Sending to IP {targetIP}");
-            clientComp.startMainLoop();
+            clientComp.startListenToConsoleLoop();
+            serverComp.startConnectionListenLoop();
 
-            while (true)
-            {
-                blockMain.Reset(); //reset flag (which is set by the listener handler to signify when main should create a new thread to listen for new connections)
+            //while (true)
+            //{
+            //    blockMain.Reset(); //reset flag (which is set by the listener handler to signify when main should create a new thread to listen for new connections)
 
-                Console.WriteLine("\nWating for new message..");
-                listener.BeginAccept(new AsyncCallback(acceptTCPRequest), listener); //listens and creates a thread (acceptTCPRequest) when it gets a request, listener is passed to the thread
+            //    Console.WriteLine("\nWating for new message..");
+            //    listener.BeginAccept(new AsyncCallback(acceptTCPRequest), listener); //listens and creates a thread (acceptTCPRequest) when it gets a request, listener is passed to the thread
 
-                blockMain.WaitOne(); //block thread until it is given signal to resume (in this case resuming creates a new listening thread and then pauses again)
-            }
+            //   blockMain.WaitOne(); //block thread until it is given signal to resume (in this case resuming creates a new listening thread and then pauses again)
+            //}
         }
 
         //  THREAD  //
@@ -189,11 +192,11 @@ namespace MessageApp
     }
 
     //this class is responsible for representing the state of a receiving buffer
-    public class BufferState
-    {
-        public const int bufferSize = 1024; //size of buffer used to receive bytes
-        public byte[] bytes = new byte[bufferSize]; //buffer used to receive bytes
-        public StringBuilder stringBuilder = new StringBuilder(); //used to build strings from bytes in the buffer
-        public Socket socket = null; //the socket this is acting as the buffer for
-    }
+//    public class BufferState
+//    {
+//        public const int bufferSize = 1024; //size of buffer used to receive bytes
+//        public byte[] bytes = new byte[bufferSize]; //buffer used to receive bytes
+//        public StringBuilder stringBuilder = new StringBuilder(); //used to build strings from bytes in the buffer
+//        public Socket socket = null; //the socket this is acting as the buffer for
+//    }
 }
