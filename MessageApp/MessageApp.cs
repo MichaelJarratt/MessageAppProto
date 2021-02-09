@@ -23,8 +23,11 @@ namespace MessageApp
         public void MainLoop()
         {
             Socket listener = setUpListener(); //gets listener that listens for any incoming TCP requests from any network interface for port <localPortNo>
-            Thread consoleInput = new Thread(listenToConsole); //listenToConsole becmes a thread and can act independently of main thread
-            consoleInput.Start(); //starts thread to listen to console input
+            //Thread consoleInput = new Thread(listenToConsole); //listenToConsole becmes a thread and can act independently of main thread
+            //consoleInput.Start(); //starts thread to listen to console input
+            ClientComp clientComp = new ClientComp(targetIP.ToString());
+            
+
 
             listener.Bind(localEndPoint); //tells listener to listen to ip/port combo
             listener.Listen(10); //sockets starts listening and will queue up to 10 requests to be serviced
@@ -33,7 +36,7 @@ namespace MessageApp
             Console.WriteLine($"Listening on IP {localEndPoint.Address}");
             Console.WriteLine($"Sending to port {targetPortNo}");
             Console.WriteLine($"Sending to IP {targetIP}");
-
+            clientComp.startMainLoop();
 
             while (true)
             {
@@ -145,6 +148,7 @@ namespace MessageApp
         //entry point
         static void Main(string[] args)
         {
+            Console.WriteLine(args);
             MessageApp messageApp;
             if (args.Length == 2) //if two arguments are provided (listen and send ports)
             {
@@ -166,7 +170,7 @@ namespace MessageApp
             localPortNo = 65432; //5678
             targetPortNo = 65432; //8765
             //targetIP = Dns.GetHostEntry(Dns.GetHostName()).AddressList[0]; //uses first IP of machine
-            targetIP = IPAddress.Parse("86.29.29.12");
+            targetIP = IPAddress.Parse("192.168.1.192");
         }
         //instantiate with local and target port numbers
         public MessageApp(int localPortNo, int targetPortNo)
