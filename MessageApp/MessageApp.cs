@@ -18,8 +18,6 @@ namespace MessageApp
         public IPEndPoint localEndPoint; //ip/port combo to listen to
         //will need a target EndPoint too
 
-        private HolePuncher holePuncher; //class used to hole punch the NAT
-        private IPEndPoint holePunchEndpoint; //endpoint to send packet to when punching hole
 
 
         public void MainLoop()
@@ -27,9 +25,6 @@ namespace MessageApp
             Socket listener = setUpListener(); //gets listener that listens for any incoming TCP requests from any network interface for port <localPortNo>
             Thread consoleInput = new Thread(listenToConsole); //listenToConsole becmes a thread and can act independently of main thread
             consoleInput.Start(); //starts thread to listen to console input
-
-            Thread holePunching = new Thread(holePunchSetup); //thread keeps hole punched in nat
-            holePunching.Start();
 
             listener.Bind(localEndPoint); //tells listener to listen to ip/port combo
             listener.Listen(10); //sockets starts listening and will queue up to 10 requests to be serviced
@@ -78,7 +73,7 @@ namespace MessageApp
             Socket handler = buffer.socket; //gets the socket from the buffer object
 
             int bytesReceived = handler.EndReceive(ar); //ends recieiving data that has been sent so far, but does not terminate connection (as data is sent as a stream, not all at once)
-
+            
             if (bytesReceived > 0) //if any bytes were received via the connection
             {
                 buffer.stringBuilder.Append(Encoding.UTF8.GetString(buffer.bytes, 0, bytesReceived)); //convert received bytes stored in buffer to a string, buffer is overwritten each time
@@ -114,7 +109,7 @@ namespace MessageApp
                 //sending is done synchronously as it is done straight away and won't lock up the application (like listening)
 
                 IPEndPoint targetEndPoint = new IPEndPoint(targetIP, targetPortNo); //what IP and port to send message to
-
+              
                 Socket sender = new Socket(targetIP.AddressFamily, SocketType.Stream, ProtocolType.Tcp); //creates TCP socket
                 try //try to send message
                 {
@@ -129,7 +124,7 @@ namespace MessageApp
                     Console.WriteLine(e.Message);
                     //throw e;
                 }
-
+               
             }
         }
 
@@ -145,22 +140,7 @@ namespace MessageApp
             return listener;
         }
 
-        // THREAD //
-        /*
-         *  this simple method just spins an icon until listenToConsole has finishing trying to send a message
-         *  users don't like entering a command and then seeing nothing happen, this is just so sending a message feels better
-         */
-        private void showSendingIcon()
-        {
-            //honestly not worth the effort 
-        }
 
-        //creates and utilises an instance of HolePuncher to punch NAT holes
-        private void holePunchSetup()
-        {
-            holePuncher = new HolePuncher(65432, "86.29.29.12"); //src/dest ports both = 65432 and will send them to supplied IP
-            holePuncher.startHolePunching(10000); //punch hole every second
-        }
 
         //entry point
         static void Main(string[] args)

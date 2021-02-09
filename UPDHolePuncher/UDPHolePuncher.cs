@@ -25,7 +25,7 @@ namespace MessageApp
 
         static void Main(string[] args)
         {
-            UDPHolePuncher hp = new UDPHolePuncher(65432, "86.29.29.12");
+            UDPHolePuncher hp = new UDPHolePuncher(65432, "2.73.184.193");
             hp.startHolePunching(1000);
             Console.ReadLine();
         }
@@ -77,10 +77,11 @@ namespace MessageApp
             //matryoshka doll the packets
             ethernetPacket.PayloadPacket = ipPacket;
             ipPacket.PayloadPacket = udpPacket;
-            
+
             //this may need to be moved elsewhere incase time factors into the checksum
-            ipPacket.Checksum = ipPacket.CalculateIPChecksum();
             udpPacket.Checksum = udpPacket.CalculateUdpChecksum();
+            ipPacket.Checksum = ipPacket.CalculateIPChecksum();
+            
 
             sendTimer = new Timer();
             sendTimer.Elapsed += new ElapsedEventHandler(sendPacket); //method to be done every interval
