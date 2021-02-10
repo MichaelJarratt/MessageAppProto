@@ -21,6 +21,8 @@ namespace MessageApp
 
         private ICaptureDevice device;
 
+        //private string MAC = NetworkInterface.GetAllNetworkInterfaces(); //could have done something like this
+
         Timer sendTimer;
 
         static void Main(string[] args)

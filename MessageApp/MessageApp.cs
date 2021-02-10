@@ -64,7 +64,7 @@ namespace MessageApp
             localPortNo = 65432; //5678
             targetPortNo = 65432; //8765
             //targetIP = Dns.GetHostEntry(Dns.GetHostName()).AddressList[0]; //uses first IP of machine
-            targetIP = IPAddress.Parse("192.168.1.192");
+            targetIP = IPAddress.Parse("192.168.1.192"); //192.168.1.192 = my laptop
         }
         //instantiate with local and target port numbers
         public MessageApp(int localPortNo, int targetPortNo)
