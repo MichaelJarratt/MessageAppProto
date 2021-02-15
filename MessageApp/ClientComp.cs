@@ -46,11 +46,13 @@ namespace MessageApp
                 Console.WriteLine("Send message:");
                 String message = Console.ReadLine(); //pauses execution /of this thread/ while waiting for input
                 sendSocket = new Socket(IPAddress.Parse(targetIP).AddressFamily, SocketType.Stream, ProtocolType.Tcp); //has to be reinstantiated for reasons
-                
+                sendSocket.Connect(targetEndPoint);
+
                 send(publicKeyMessage());
                 receiveKey();
                 send(message); //all synchronous and block while being done, the key exchange must be done first
-                
+
+                sendSocket.Close();
             }
         }
 
@@ -64,7 +66,12 @@ namespace MessageApp
         //synchronously receives key from server
         private void receiveKey()
         {
+            Byte[] keyBytes = new Byte[1024]; //raw bytes received
+            sendSocket.Receive(keyBytes);
 
+            String key = Encoding.UTF8.GetString(keyBytes);
+
+            Console.WriteLine("received key: " + key);
         }
 
         //sends provided message to server
@@ -75,9 +82,9 @@ namespace MessageApp
             //sendSocket = new Socket(IPAddress.Parse(targetIP).AddressFamily, SocketType.Stream, ProtocolType.Tcp); //has to be reinstantiated for reasons
             try
             {
-                sendSocket.Connect(targetEndPoint); // tries to connect to another client
+                //sendSocket.Connect(targetEndPoint); // tries to connect to another client
                 sendSocket.Send(messageByteArray); //sends message synchronously
-                sendSocket.Close();
+                //sendSocket.Close();
             }
             catch (SocketException e)
             {

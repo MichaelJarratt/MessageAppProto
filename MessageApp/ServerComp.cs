@@ -124,6 +124,7 @@ namespace MessageApp
             receiveHandler.Receive(keyBytes);
 
             String key = Encoding.UTF8.GetString(keyBytes);
+            key = key.Substring(0, key.Length - 5);
 
             Console.WriteLine("received key: "+key);
         }
@@ -131,7 +132,7 @@ namespace MessageApp
         private void sendKey(Socket receiveHandler)
         {
             string key = "server key";
-            receiveHandler.Send(Encoding.UTF8.GetBytes(key+"<EOF>"));
+            receiveHandler.Send(Encoding.UTF8.GetBytes(key));
         }
 
         //callback called by receiveBytes, will use received key to decode message and the callback the message to MessageApp
