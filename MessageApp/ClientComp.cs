@@ -63,6 +63,16 @@ namespace MessageApp
                 }
             }
         }
+        //sends provided message to server
+        private void send(string message)
+        {
+
+        }
+        //received key from server
+        private void receive()
+        {
+
+        }
 
         //offers way to begin the main loop
         public void startListenToConsoleLoop()
