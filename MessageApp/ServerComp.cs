@@ -123,8 +123,9 @@ namespace MessageApp
             Byte[] keyBytes = new Byte[1024]; //raw bytes received
             receiveHandler.Receive(keyBytes);
 
-            String key = Encoding.UTF8.GetString(keyBytes);
-            key = key.Substring(0, key.Length - 5);
+            String key = Encoding.UTF8.GetString(keyBytes).Trim(); //converts it to string
+            key = System.Text.RegularExpressions.Regex.Replace(key, @"[\0]", string.Empty); //for some reason it is padded up to 1024 characters with \0's, this removes them
+            key = key.Substring(0, key.Length - 5); //removes the <EOF> tag
 
             Console.WriteLine("received key: "+key);
         }
