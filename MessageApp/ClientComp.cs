@@ -45,33 +45,46 @@ namespace MessageApp
             {
                 Console.WriteLine("Send message:");
                 String message = Console.ReadLine(); //pauses execution /of this thread/ while waiting for input
-
-                Byte[] messageByteArray = Encoding.UTF8.GetBytes(message.Trim() + "<EOF>"); //trims message, adds flag and then converts it to bytes
-
                 sendSocket = new Socket(IPAddress.Parse(targetIP).AddressFamily, SocketType.Stream, ProtocolType.Tcp); //has to be reinstantiated for reasons
-                try
-                {
-                    sendSocket.Connect(targetEndPoint); // tries to connect to another client
-                    sendSocket.Send(messageByteArray); //sends message synchronously
-                    sendSocket.Close();
-                }
-                catch (SocketException e)
-                {
-                    Console.WriteLine("Could not connect to target");
-                    Console.WriteLine("Socket error code: " + e.ErrorCode);
-                    Console.WriteLine(e.Message);
-                }
+                
+                send(publicKeyMessage());
+                receiveKey();
+                send(message); //all synchronous and block while being done, the key exchange must be done first
+                
             }
         }
+
+        //gets the public key and returns it in a sendable format
+        private String publicKeyMessage()
+        {
+            //code
+            return "public key";
+        }
+
+        //synchronously receives key from server
+        private void receiveKey()
+        {
+
+        }
+
         //sends provided message to server
         private void send(string message)
         {
+            Byte[] messageByteArray = Encoding.UTF8.GetBytes(message.Trim() + "<EOF>"); //trims message, adds flag and then converts it to bytes
 
-        }
-        //received key from server
-        private void receive()
-        {
-
+            //sendSocket = new Socket(IPAddress.Parse(targetIP).AddressFamily, SocketType.Stream, ProtocolType.Tcp); //has to be reinstantiated for reasons
+            try
+            {
+                sendSocket.Connect(targetEndPoint); // tries to connect to another client
+                sendSocket.Send(messageByteArray); //sends message synchronously
+                sendSocket.Close();
+            }
+            catch (SocketException e)
+            {
+                Console.WriteLine("Could not connect to target");
+                Console.WriteLine("Socket error code: " + e.ErrorCode);
+                Console.WriteLine(e.Message);
+            }
         }
 
         //offers way to begin the main loop

@@ -72,6 +72,9 @@ namespace MessageApp
             Socket conListenerTemp = (Socket)ar.AsyncState; //gets the connectionListener socket from the listenLoop (although couldn't this be done via the field?)
             Socket receiveHandler = conListenerTemp.EndAccept(ar); //gets socket that will receive bytes
 
+            receiveKey(receiveHandler); //block
+            sendKey(receiveHandler); //block .keys are exchanged syncrhonously (must be completed first), then continue receiving message
+
             BufferState bufferState = new BufferState(); //creates new bit buffer for receiving socket
             bufferState.socket = receiveHandler; //places socket this buffer is for inside so it can be passed in the IAsyncResult
             receiveHandler.BeginReceive(bufferState.bytes, 0, BufferState.bufferSize, SocketFlags.None, new AsyncCallback(receiveBytes), bufferState);
@@ -114,6 +117,28 @@ namespace MessageApp
             //or when <EOF> were received
         }
 
+        // synchronously accepts the public key of the client
+        private void receiveKey(Socket receiveHandler)
+        {
+            Byte[] keyBytes = new Byte[1024]; //raw bytes received
+            receiveHandler.Receive(keyBytes);
+
+            String key = Encoding.UTF8.GetString(keyBytes);
+
+            Console.WriteLine("received key: "+key);
+        }
+        // gets the public key and sends it synchronously
+        private void sendKey(Socket receiveHandler)
+        {
+            string key = "server key";
+            receiveHandler.Send(Encoding.UTF8.GetBytes(key+"<EOF>"));
+        }
+
+        //callback called by receiveBytes, will use received key to decode message and the callback the message to MessageApp
+        private void completeReceive()
+        {
+
+        }
 
         public void setMessageCallback(Action<String> NewObj)
         {
