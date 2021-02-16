@@ -53,7 +53,7 @@ namespace MessageApp
 
                 pubkeyReceived = new ManualResetEvent(false);
 
-                send(publicKeyMessage());
+                sendKey(sendSocket);
                 receiveKey();
                 send(message); //all synchronous and block while being done, the key exchange must be done first
 
@@ -68,7 +68,13 @@ namespace MessageApp
             Console.WriteLine("sent key: "+publicKey+"\n/end key\n\n");
             return publicKey;
         }
-
+        //get key from CryptoUtility and send it to paired application
+        private void sendKey(Socket sendSocket)
+        {
+            string publicKey = CryptoUtility.getPublicKey(); //gets keystring from utility class
+            Console.WriteLine("sent key: " + publicKey + "\n/end key\n\n");
+            sendSocket.Send(Encoding.UTF8.GetBytes(publicKey)); //converts key to UTF-8 Byte array and sends it synchronously
+        }
         //synchronously receives key from server
         private void receiveKey()
         {
@@ -92,7 +98,8 @@ namespace MessageApp
             string encMessage = CryptoUtility.encryptData(message, receivedPublicKeyString);
             Console.WriteLine($"Encrypted message:\n{encMessage}\n/End encrypted message");
 
-            Byte[] messageByteArray = Encoding.UTF8.GetBytes(message.Trim() + "<EOF>"); //trims message, adds flag and then converts it to bytes
+            //Byte[] messageByteArray = Encoding.UTF8.GetBytes(message.Trim() + "<EOF>"); //trims message, adds flag and then converts it to bytes
+            Byte[] messageByteArray = Encoding.UTF8.GetBytes(encMessage+ "<EOF>"); //adds flag to encrypted message and then converts it to bytes
 
             //sendSocket = new Socket(IPAddress.Parse(targetIP).AddressFamily, SocketType.Stream, ProtocolType.Tcp); //has to be reinstantiated for reasons
             try

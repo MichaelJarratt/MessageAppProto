@@ -75,7 +75,14 @@ namespace MessageApp
         //takes an encrypted message and key and decrypts it
         public static string decryptData(string message, string key)
         {
-            return "";
+            Byte[] messageBytes = Encoding.UTF8.GetBytes(message);
+
+            RSACryptoServiceProvider decrypter = new RSACryptoServiceProvider(); //create instance that will do the decryption
+            decrypter.ImportParameters(keyStringToRSAParam(key)); //converts the keystring to a key and sets it
+            messageBytes = decrypter.Decrypt(messageBytes, false);
+
+            String decryptedMessage = Encoding.UTF8.GetString(messageBytes); //turns bytes back into string
+            return decryptedMessage;
         }
 
         //https://stackoverflow.com/questions/17128038/c-sharp-rsa-encryption-decryption-with-transmission

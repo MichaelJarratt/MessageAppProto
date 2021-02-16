@@ -104,7 +104,7 @@ namespace MessageApp
                     //Console.WriteLine($"--{content}--"); //print received message to console
                     //Console.WriteLine(messageString);
                     //Console.WriteLine();
-                    messageAppReturn(messageString);
+                    decryptMessage(messageString); //decrypt message 
                 }
                 else //transmission is still going but has not finished yet
                 {
@@ -115,6 +115,15 @@ namespace MessageApp
             }
             //arrive here when no bytes were received
             //or when <EOF> were received
+        }
+
+        //decrypts the message and returns it to MessageApp
+        private void decryptMessage(string messageString)
+        {
+            string privateKey = CryptoUtility.getPrivateKey(); //gets string represenation of key
+            Console.WriteLine($"Received encrypted message:\n{messageString}\nMessage end.");
+            messageString = CryptoUtility.decryptData(messageString, privateKey);
+            messageAppReturn(messageString);
         }
 
         // synchronously accepts the public key of the client
