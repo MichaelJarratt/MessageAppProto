@@ -15,6 +15,9 @@ namespace MessageApp
         private Socket sendSocket; //socket creating outbound connections
         IPEndPoint targetEndPoint; //ip/port combo to send messages to
 
+        private string receivedPublicKeyString;
+        private ManualResetEvent pubkeyReceived; //blocks message encryption until key is received
+
         public ClientComp(string targetIP)
         {
             this.targetIP = targetIP;
@@ -48,6 +51,7 @@ namespace MessageApp
                 sendSocket = new Socket(IPAddress.Parse(targetIP).AddressFamily, SocketType.Stream, ProtocolType.Tcp); //has to be reinstantiated for reasons
                 sendSocket.Connect(targetEndPoint);
 
+                pubkeyReceived = new ManualResetEvent(false);
 
                 send(publicKeyMessage());
                 receiveKey();
@@ -61,7 +65,7 @@ namespace MessageApp
         private String publicKeyMessage()
         {
             String publicKey = CryptoUtility.getPublicKey();
-            //Console.WriteLine(publicKey);
+            Console.WriteLine("sent key: "+publicKey+"\n/end key\n\n");
             return publicKey;
         }
 
@@ -72,13 +76,22 @@ namespace MessageApp
             sendSocket.Receive(keyBytes);
 
             String key = Encoding.UTF8.GetString(keyBytes);
+            key = System.Text.RegularExpressions.Regex.Replace(key, @"[\0]", string.Empty); //for some reason it is padded up to 1024 characters with \0's, this removes them
 
-            Console.WriteLine("received key: " + key);
+            Console.WriteLine("received key: " + key +"\n/end key\n\n");
+            receivedPublicKeyString = key;
+            pubkeyReceived.Set();
         }
 
         //sends provided message to server
         private void send(string message)
         {
+            //while(receivedPublicKeyString == null)
+            //{ }
+            pubkeyReceived.WaitOne();
+            string encMessage = CryptoUtility.encryptData(message, receivedPublicKeyString);
+            Console.WriteLine($"Encrypted message:\n{encMessage}\n/End encrypted message");
+
             Byte[] messageByteArray = Encoding.UTF8.GetBytes(message.Trim() + "<EOF>"); //trims message, adds flag and then converts it to bytes
 
             //sendSocket = new Socket(IPAddress.Parse(targetIP).AddressFamily, SocketType.Stream, ProtocolType.Tcp); //has to be reinstantiated for reasons

@@ -128,7 +128,7 @@ namespace MessageApp
             key = System.Text.RegularExpressions.Regex.Replace(key, @"[\0]", string.Empty); //for some reason it is padded up to 1024 characters with \0's, this removes them
             key = key.Substring(0, key.Length - 5); //removes the <EOF> tag
             //!get and decode key string
-
+            Console.WriteLine("received key: " + key + "\n/end key\n\n");
             //Console.WriteLine("received key: "+key);
             return key;
 
@@ -137,8 +137,9 @@ namespace MessageApp
         private void sendKey(Socket receiveHandler)
         {
             //string key = "server key";
-            string key = CryptoUtility.getPublicKey(); //gets keystring from utility class
-            receiveHandler.Send(Encoding.UTF8.GetBytes(key)); //converts key to UTF-8 Byte array and sends it synchronously
+            string publicKey = CryptoUtility.getPublicKey(); //gets keystring from utility class
+            Console.WriteLine("sent key: " + publicKey + "\n/end key\n\n");
+            receiveHandler.Send(Encoding.UTF8.GetBytes(publicKey)); //converts key to UTF-8 Byte array and sends it synchronously
         }
 
         //callback called by receiveBytes, will use received key to decode message and the callback the message to MessageApp
