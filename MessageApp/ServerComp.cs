@@ -122,7 +122,7 @@ namespace MessageApp
         private void decryptMessage(string messageString)
         {
             string privateKey = CryptoUtility.getPrivateKey(); //gets string represenation of key
-            Console.WriteLine($"Received encrypted message:\n{messageString}\nMessage end.");
+            //Console.WriteLine($"Received encrypted message:\n{messageString}\nMessage end.");
             messageString = CryptoUtility.decryptData(messageString, privateKey);
             messageAppReturn(messageString);
         }
@@ -130,16 +130,12 @@ namespace MessageApp
         // synchronously accepts the public key of the client
         private string receiveKey(Socket receiveHandler)
         {
-            //get and decode key string
             Byte[] keyBytes = new Byte[1024]; //raw bytes received
-            receiveHandler.Receive(keyBytes);
+            int receivedBytes = receiveHandler.Receive(keyBytes);
 
-            String key = Encoding.UTF8.GetString(keyBytes).Trim(); //converts it to string
-            key = System.Text.RegularExpressions.Regex.Replace(key, @"[\0]", string.Empty); //for some reason it is padded up to 1024 characters with \0's, this removes them
-            key = key.Substring(0, key.Length - 5); //removes the <EOF> tag
-            //!get and decode key string
-            Console.WriteLine("received key: " + key + "\n/end key\n\n");
-            //Console.WriteLine("received key: "+key);
+            String key = Encoding.UTF8.GetString(keyBytes, 0, receivedBytes); //only converts bytes that were received to get key
+
+            //Console.WriteLine("received key: " + key +"\n/end key\n\n");
             return key;
 
         }
@@ -148,8 +144,8 @@ namespace MessageApp
         {
             //string key = "server key";
             string publicKey = CryptoUtility.getPublicKey(); //gets keystring from utility class
-            Console.WriteLine("sent key: " + publicKey + "\n/end key\n\n");
             receiveHandler.Send(Encoding.UTF8.GetBytes(publicKey)); //converts key to UTF-8 Byte array and sends it synchronously
+            //Console.WriteLine("sent key: " + publicKey + "\n/end key\n\n");
         }
 
         //callback called by receiveBytes, will use received key to decode message and the callback the message to MessageApp
