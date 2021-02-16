@@ -5,7 +5,9 @@ VisualStudioVersion = 16.0.30523.141
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MessageApp", "MessageApp\MessageApp.csproj", "{0F565F84-9C97-434B-9BDF-7FF52FFF9E49}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UPDHolePuncher", "UPDHolePuncher\UPDHolePuncher.csproj", "{88851710-C473-4166-B4D4-023AEE39B0B0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UPDHolePuncher", "UPDHolePuncher\UPDHolePuncher.csproj", "{88851710-C473-4166-B4D4-023AEE39B0B0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MessageAppClone", "MessageAppClone\MessageAppClone.csproj", "{F16DFEA0-42AF-45FD-A499-09602F64B86D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,9 @@ Global
 		{88851710-C473-4166-B4D4-023AEE39B0B0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{88851710-C473-4166-B4D4-023AEE39B0B0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{88851710-C473-4166-B4D4-023AEE39B0B0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F16DFEA0-42AF-45FD-A499-09602F64B86D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F16DFEA0-42AF-45FD-A499-09602F64B86D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F16DFEA0-42AF-45FD-A499-09602F64B86D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

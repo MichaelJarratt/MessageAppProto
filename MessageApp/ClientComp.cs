@@ -48,6 +48,7 @@ namespace MessageApp
                 sendSocket = new Socket(IPAddress.Parse(targetIP).AddressFamily, SocketType.Stream, ProtocolType.Tcp); //has to be reinstantiated for reasons
                 sendSocket.Connect(targetEndPoint);
 
+
                 send(publicKeyMessage());
                 receiveKey();
                 send(message); //all synchronous and block while being done, the key exchange must be done first
@@ -59,8 +60,9 @@ namespace MessageApp
         //gets the public key and returns it in a sendable format
         private String publicKeyMessage()
         {
-            //code
-            return "public key";
+            String publicKey = CryptoUtility.getPublicKey();
+            //Console.WriteLine(publicKey);
+            return publicKey;
         }
 
         //synchronously receives key from server

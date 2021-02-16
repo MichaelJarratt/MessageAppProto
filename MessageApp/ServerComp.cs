@@ -72,7 +72,7 @@ namespace MessageApp
             Socket conListenerTemp = (Socket)ar.AsyncState; //gets the connectionListener socket from the listenLoop (although couldn't this be done via the field?)
             Socket receiveHandler = conListenerTemp.EndAccept(ar); //gets socket that will receive bytes
 
-            receiveKey(receiveHandler); //block
+            String keyString = receiveKey(receiveHandler); //block
             sendKey(receiveHandler); //block .keys are exchanged syncrhonously (must be completed first), then continue receiving message
 
             BufferState bufferState = new BufferState(); //creates new bit buffer for receiving socket
@@ -118,22 +118,27 @@ namespace MessageApp
         }
 
         // synchronously accepts the public key of the client
-        private void receiveKey(Socket receiveHandler)
+        private string receiveKey(Socket receiveHandler)
         {
+            //get and decode key string
             Byte[] keyBytes = new Byte[1024]; //raw bytes received
             receiveHandler.Receive(keyBytes);
 
             String key = Encoding.UTF8.GetString(keyBytes).Trim(); //converts it to string
             key = System.Text.RegularExpressions.Regex.Replace(key, @"[\0]", string.Empty); //for some reason it is padded up to 1024 characters with \0's, this removes them
             key = key.Substring(0, key.Length - 5); //removes the <EOF> tag
+            //!get and decode key string
 
-            Console.WriteLine("received key: "+key);
+            //Console.WriteLine("received key: "+key);
+            return key;
+
         }
         // gets the public key and sends it synchronously
         private void sendKey(Socket receiveHandler)
         {
-            string key = "server key";
-            receiveHandler.Send(Encoding.UTF8.GetBytes(key));
+            //string key = "server key";
+            string key = CryptoUtility.getPublicKey(); //gets keystring from utility class
+            receiveHandler.Send(Encoding.UTF8.GetBytes(key)); //converts key to UTF-8 Byte array and sends it synchronously
         }
 
         //callback called by receiveBytes, will use received key to decode message and the callback the message to MessageApp
@@ -157,5 +162,6 @@ namespace MessageApp
         public byte[] bytes = new byte[bufferSize]; //buffer used to receive bytes
         public StringBuilder stringBuilder = new StringBuilder(); //used to build strings from bytes in the buffer
         public Socket socket = null; //the socket this is acting as the buffer for
+        public string keyString = String.Empty; //holds the key used to decrypt the data
     }
 }
