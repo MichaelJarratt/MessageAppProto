@@ -76,7 +76,7 @@ namespace MessageApp
         public static string decryptData(string message, string key)
         {
             Byte[] messageBytes = Encoding.UTF8.GetBytes(message);
-
+            Byte[] keyBytes = rcsp.ExportRSAPrivateKey();
             RSACryptoServiceProvider decrypter = new RSACryptoServiceProvider(); //create instance that will do the decryption
             decrypter.ImportParameters(keyStringToRSAParam(key)); //converts the keystring to a key and sets it
             messageBytes = decrypter.Decrypt(messageBytes, false);
