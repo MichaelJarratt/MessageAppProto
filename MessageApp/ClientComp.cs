@@ -61,13 +61,6 @@ namespace MessageApp
             }
         }
 
-        //gets the public key and returns it in a sendable format
-        private String publicKeyMessage()
-        {
-            String publicKey = CryptoUtility.getPublicKey();
-            Console.WriteLine("sent key: "+publicKey+"\n/end key\n\n");
-            return publicKey;
-        }
         //get key from CryptoUtility and send it to paired application
         private void sendKey(Socket sendSocket)
         {

@@ -77,6 +77,7 @@ namespace MessageApp
 
             BufferState bufferState = new BufferState(); //creates new bit buffer for receiving socket
             bufferState.socket = receiveHandler; //places socket this buffer is for inside so it can be passed in the IAsyncResult
+            bufferState.keyString = keyString;
             receiveHandler.BeginReceive(bufferState.bytes, 0, BufferState.bufferSize, SocketFlags.None, new AsyncCallback(receiveBytes), bufferState);
         }
         
