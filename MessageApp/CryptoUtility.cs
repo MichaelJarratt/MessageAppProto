@@ -68,15 +68,18 @@ namespace MessageApp
             encrypter.ImportParameters(keyStringToRSAParam(key)); //converts the keystring to a key and sets it
             messageBytes = encrypter.Encrypt(messageBytes, false);
 
-            String encryptedMessage = Encoding.UTF8.GetString(messageBytes);
+            //String encryptedMessage = Encoding.UTF8.GetString(messageBytes);
+            string encryptedMessage = System.Convert.ToBase64String(messageBytes);
             return encryptedMessage;
         }
 
         //takes an encrypted message and key and decrypts it
         public static string decryptData(string message, string key)
         {
-            Byte[] messageBytes = Encoding.UTF8.GetBytes(message);
+            //Byte[] messageBytes = Encoding.UTF8.GetBytes(message);
+            Byte[] messageBytes = System.Convert.FromBase64String(message);
             Byte[] keyBytes = rcsp.ExportRSAPrivateKey();
+
             RSACryptoServiceProvider decrypter = new RSACryptoServiceProvider(); //create instance that will do the decryption
             decrypter.ImportParameters(keyStringToRSAParam(key)); //converts the keystring to a key and sets it
             messageBytes = decrypter.Decrypt(messageBytes, false);
