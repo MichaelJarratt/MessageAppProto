@@ -121,6 +121,10 @@ namespace MessageApp
         //decrypts the message and returns it to MessageApp
         private void decryptMessage(string messageString, BufferState bufferState)
         {
+            Byte[] signature = new byte[253];
+            Array.Copy(bufferState.bytes, signature, 253); //takes the first 253 bytes (signature) from buffer
+            Console.WriteLine("signature: "+System.Convert.ToBase64String(signature));
+
             string privateKey = CryptoUtility.getPrivateKey(); //gets string represenation of receivers private key
             messageString = CryptoUtility.decryptData(messageString, privateKey); //decrypts message with private key
 

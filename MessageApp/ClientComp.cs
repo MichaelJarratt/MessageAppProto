@@ -88,19 +88,24 @@ namespace MessageApp
         private void send(string message)
         {
             //get signature of message
-            Byte[] signature = CryptoUtility.signMessage(message); //gets byte array representing signature of message signed with private key
+            Byte[] signatureBytes = CryptoUtility.signMessage(message); //gets byte array representing signature of message signed with private key
 
             String encMessage = CryptoUtility.encryptData(message, receivedPublicKeyString); //encrypts message with public key of recipient
             Console.WriteLine($"Encrypted message:\n{encMessage}\n/End encrypted message");
-
-            //Byte[] messageByteArray = Encoding.UTF8.GetBytes(message.Trim() + "<EOF>"); //trims message, adds flag and then converts it to bytes
             Byte[] messageByteArray = Encoding.UTF8.GetBytes(encMessage+ "<EOF>"); //adds flag to encrypted message and then converts it to bytes
+
+            //stick signature and message together
+            Byte[] transmissionBytes = new byte[253+messageByteArray.Length]; //signature is always 253 bytes
+            Array.Copy(signatureBytes, transmissionBytes, 253); //fills first 253 bytes of array with signature
+            Array.Copy(messageByteArray, 0, transmissionBytes, 254, messageByteArray.Length); //starting in position after signature bytes, add all message bytes
+
+            Console.WriteLine("signature: " + System.Convert.ToBase64String(signatureBytes));
 
             //sendSocket = new Socket(IPAddress.Parse(targetIP).AddressFamily, SocketType.Stream, ProtocolType.Tcp); //has to be reinstantiated for reasons
             try
             {
                 //sendSocket.Connect(targetEndPoint); // tries to connect to another client
-                sendSocket.Send(messageByteArray); //sends message synchronously
+                sendSocket.Send(transmissionBytes); //sends message synchronously
                 //sendSocket.Close();
             }
             catch (SocketException e)
