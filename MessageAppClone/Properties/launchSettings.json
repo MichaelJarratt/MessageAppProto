@@ -1,0 +1,9 @@
+{
+  "profiles": {
+    "MessageAppClone": {
+      "commandName": "Executable",
+      "executablePath": "D:\\programs\\C#\\MessageAppProto\\MessageApp\\bin\\Release\\netcoreapp3.1\\MessageApp.exe",
+      "commandLineArgs": "8765 65432 192.168.1.199"
+    }
+  }
+}

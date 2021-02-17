@@ -41,6 +41,7 @@ namespace MessageApp
         //entry point
         static void Main(string[] args)
         {
+            //CryptoUtility.encrypt("yee yee ass haircut");
             Console.WriteLine(args);
             MessageApp messageApp;
             if (args.Length == 2) //if two arguments are provided (listen and send ports)

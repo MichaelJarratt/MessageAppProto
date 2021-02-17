@@ -45,6 +45,10 @@
             "SharpPcap": {
               "target": "Package",
               "version": "[5.4.0, )"
+            },
+            "System.Security.Cryptography.Cng": {
+              "target": "Package",
+              "version": "[5.0.0, )"
             }
           },
           "imports": [

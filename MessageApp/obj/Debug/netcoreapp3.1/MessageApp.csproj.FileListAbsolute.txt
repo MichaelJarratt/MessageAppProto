@@ -7,7 +7,6 @@ C:\Users\Michael\source\repos\MessageApp\MessageApp\obj\Debug\netcoreapp3.1\Mess
 D:\programs\C#\MessageAppProto\MessageApp\obj\Debug\netcoreapp3.1\MessageApp.csprojAssemblyReference.cache
 D:\programs\C#\MessageAppProto\MessageApp\obj\Debug\netcoreapp3.1\MessageApp.AssemblyInfoInputs.cache
 D:\programs\C#\MessageAppProto\MessageApp\obj\Debug\netcoreapp3.1\MessageApp.AssemblyInfo.cs
-D:\programs\C#\MessageAppProto\MessageApp\obj\Debug\netcoreapp3.1\MessageApp.csproj.CoreCompileInputs.cache
 D:\programs\C#\MessageAppProto\MessageApp\bin\Debug\netcoreapp3.1\MessageApp.exe
 D:\programs\C#\MessageAppProto\MessageApp\bin\Debug\netcoreapp3.1\MessageApp.deps.json
 D:\programs\C#\MessageAppProto\MessageApp\bin\Debug\netcoreapp3.1\MessageApp.runtimeconfig.json
@@ -20,3 +19,7 @@ D:\programs\C#\MessageAppProto\MessageApp\obj\Debug\netcoreapp3.1\MessageApp.csp
 D:\programs\C#\MessageAppProto\MessageApp\obj\Debug\netcoreapp3.1\MessageApp.dll
 D:\programs\C#\MessageAppProto\MessageApp\obj\Debug\netcoreapp3.1\MessageApp.pdb
 D:\programs\C#\MessageAppProto\MessageApp\obj\Debug\netcoreapp3.1\MessageApp.genruntimeconfig.cache
+D:\programs\C#\MessageAppProto\MessageApp\obj\Debug\netcoreapp3.1\MessageApp.csproj.CoreCompileInputs.cache
+D:\programs\C#\MessageAppProto\MessageApp\bin\Debug\netcoreapp3.1\System.Formats.Asn1.dll
+D:\programs\C#\MessageAppProto\MessageApp\bin\Debug\netcoreapp3.1\System.Security.Cryptography.Cng.dll
+D:\programs\C#\MessageAppProto\MessageApp\bin\Debug\netcoreapp3.1\runtimes\win\lib\netcoreapp3.0\System.Security.Cryptography.Cng.dll

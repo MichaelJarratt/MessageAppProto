@@ -72,8 +72,12 @@ namespace MessageApp
             Socket conListenerTemp = (Socket)ar.AsyncState; //gets the connectionListener socket from the listenLoop (although couldn't this be done via the field?)
             Socket receiveHandler = conListenerTemp.EndAccept(ar); //gets socket that will receive bytes
 
+            String keyString = receiveKey(receiveHandler); //block
+            sendKey(receiveHandler); //block .keys are exchanged syncrhonously (must be completed first), then continue receiving message
+
             BufferState bufferState = new BufferState(); //creates new bit buffer for receiving socket
             bufferState.socket = receiveHandler; //places socket this buffer is for inside so it can be passed in the IAsyncResult
+            bufferState.keyString = keyString;
             receiveHandler.BeginReceive(bufferState.bytes, 0, BufferState.bufferSize, SocketFlags.None, new AsyncCallback(receiveBytes), bufferState);
         }
         
@@ -101,7 +105,7 @@ namespace MessageApp
                     //Console.WriteLine($"--{content}--"); //print received message to console
                     //Console.WriteLine(messageString);
                     //Console.WriteLine();
-                    messageAppReturn(messageString);
+                    decryptMessage(messageString); //decrypt message 
                 }
                 else //transmission is still going but has not finished yet
                 {
@@ -114,6 +118,41 @@ namespace MessageApp
             //or when <EOF> were received
         }
 
+        //decrypts the message and returns it to MessageApp
+        private void decryptMessage(string messageString)
+        {
+            string privateKey = CryptoUtility.getPrivateKey(); //gets string represenation of key
+            //Console.WriteLine($"Received encrypted message:\n{messageString}\nMessage end.");
+            messageString = CryptoUtility.decryptData(messageString, privateKey);
+            messageAppReturn(messageString);
+        }
+
+        // synchronously accepts the public key of the client
+        private string receiveKey(Socket receiveHandler)
+        {
+            Byte[] keyBytes = new Byte[1024]; //raw bytes received
+            int receivedBytes = receiveHandler.Receive(keyBytes);
+
+            String key = Encoding.UTF8.GetString(keyBytes, 0, receivedBytes); //only converts bytes that were received to get key
+
+            //Console.WriteLine("received key: " + key +"\n/end key\n\n");
+            return key;
+
+        }
+        // gets the public key and sends it synchronously
+        private void sendKey(Socket receiveHandler)
+        {
+            //string key = "server key";
+            string publicKey = CryptoUtility.getPublicKey(); //gets keystring from utility class
+            receiveHandler.Send(Encoding.UTF8.GetBytes(publicKey)); //converts key to UTF-8 Byte array and sends it synchronously
+            //Console.WriteLine("sent key: " + publicKey + "\n/end key\n\n");
+        }
+
+        //callback called by receiveBytes, will use received key to decode message and the callback the message to MessageApp
+        private void completeReceive()
+        {
+
+        }
 
         public void setMessageCallback(Action<String> NewObj)
         {
@@ -130,5 +169,6 @@ namespace MessageApp
         public byte[] bytes = new byte[bufferSize]; //buffer used to receive bytes
         public StringBuilder stringBuilder = new StringBuilder(); //used to build strings from bytes in the buffer
         public Socket socket = null; //the socket this is acting as the buffer for
+        public string keyString = String.Empty; //holds the key used to decrypt the data
     }
 }
