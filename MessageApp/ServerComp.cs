@@ -77,7 +77,7 @@ namespace MessageApp
 
             BufferState bufferState = new BufferState(); //creates new bit buffer for receiving socket
             bufferState.socket = receiveHandler; //places socket this buffer is for inside so it can be passed in the IAsyncResult
-            bufferState.keyString = keyString;
+            bufferState.keyString = keyString; //stores senders public key in bufferState
             receiveHandler.BeginReceive(bufferState.bytes, 0, BufferState.bufferSize, SocketFlags.None, new AsyncCallback(receiveBytes), bufferState);
         }
         
@@ -105,7 +105,7 @@ namespace MessageApp
                     //Console.WriteLine($"--{content}--"); //print received message to console
                     //Console.WriteLine(messageString);
                     //Console.WriteLine();
-                    decryptMessage(messageString); //decrypt message 
+                    decryptMessage(messageString,bufferState); //decrypt message, senders public key is stored in bufferState
                 }
                 else //transmission is still going but has not finished yet
                 {
@@ -119,11 +119,12 @@ namespace MessageApp
         }
 
         //decrypts the message and returns it to MessageApp
-        private void decryptMessage(string messageString)
+        private void decryptMessage(string messageString, BufferState bufferState)
         {
-            string privateKey = CryptoUtility.getPrivateKey(); //gets string represenation of key
+            messageString = CryptoUtility.decryptData(messageString, bufferState.keyString); //decrypts/unsigns message with senders public key
+            string privateKey = CryptoUtility.getPrivateKey(); //gets string represenation of receivers private key
             //Console.WriteLine($"Received encrypted message:\n{messageString}\nMessage end.");
-            messageString = CryptoUtility.decryptData(messageString, privateKey);
+            messageString = CryptoUtility.decryptData(messageString, privateKey); //decrypts message with private key
             messageAppReturn(messageString);
         }
 
