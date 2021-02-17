@@ -78,12 +78,12 @@ namespace MessageApp
         {
             //Byte[] messageBytes = Encoding.UTF8.GetBytes(message);
             Byte[] messageBytes = System.Convert.FromBase64String(message);
-            Byte[] keyBytes = rcsp.ExportRSAPrivateKey();
+            //Byte[] keyBytes = rcsp.ExportRSAPrivateKey();
 
             RSACryptoServiceProvider decrypter = new RSACryptoServiceProvider(); //create instance that will do the decryption
             decrypter.ImportParameters(keyStringToRSAParam(key)); //converts the keystring to a key and sets it
             messageBytes = decrypter.Decrypt(messageBytes, false);
-
+            
             String decryptedMessage = Encoding.UTF8.GetString(messageBytes); //turns bytes back into string
             return decryptedMessage;
         }

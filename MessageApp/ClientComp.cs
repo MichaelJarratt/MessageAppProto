@@ -87,9 +87,9 @@ namespace MessageApp
         //sends provided message to server
         private void send(string message)
         {
-            string encMessage = CryptoUtility.encryptData(message, receivedPublicKeyString); //encrypts message with public key of recipient
             string privateKey = CryptoUtility.getPrivateKey();
-            encMessage = CryptoUtility.encryptData(message, privateKey); //signes it with private key of sender
+            string encMessage = CryptoUtility.encryptData(message, privateKey); //signes it with private key of sender
+            encMessage = CryptoUtility.encryptData(message, receivedPublicKeyString); //encrypts message with public key of recipient
             Console.WriteLine($"Encrypted message:\n{encMessage}\n/End encrypted message");
 
             //Byte[] messageByteArray = Encoding.UTF8.GetBytes(message.Trim() + "<EOF>"); //trims message, adds flag and then converts it to bytes
