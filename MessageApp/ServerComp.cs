@@ -124,7 +124,6 @@ namespace MessageApp
             string privateKey = CryptoUtility.getPrivateKey(); //gets string represenation of receivers private key
             messageString = CryptoUtility.decryptData(messageString, privateKey); //decrypts message with private key
 
-            messageString = CryptoUtility.decryptData(messageString, bufferState.keyString); //decrypts/unsigns message with senders public key   
             //Console.WriteLine($"Received encrypted message:\n{messageString}\nMessage end.");
             
             messageAppReturn(messageString);

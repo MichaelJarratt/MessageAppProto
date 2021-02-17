@@ -8,8 +8,6 @@ namespace MessageApp
     //this class is used to provide cryptography utilities to this application
     public static class CryptoUtility
     {
-        static RSACng RSAKey = new RSACng(3072); //creates new RSA thing with random key of size 3072 (public/private keys will be different each launch)
-        //static RSACng remoteRSAKey = new RSACng();
 
         static RSACryptoServiceProvider rcsp = new RSACryptoServiceProvider(2024); //keeps the key to use during instance lifetime
         //static RSAEncryptionPadding padding = new RSAEncryptionPadding();
@@ -105,107 +103,35 @@ namespace MessageApp
 
         }
 
-        public static void badencrypt(string message)
+        /// <summary>
+        /// Creates a signature of messageString using this instances private key and SHA256
+        /// </summary>
+        /// <param name="messageString"></param>
+        /// <returns>
+        /// Byte array containing the signed hash of the message
+        /// </returns>
+        public static Byte[] signMessage(string messageString)
         {
-            Byte[] messageBytes = Encoding.UTF8.GetBytes(message); //convert message to byte[]
+            Byte[] messageBytes = Encoding.UTF8.GetBytes(messageString); //convert string to bytes
 
-            //get "remote" keys
-            RSACng remoteRSAKey = new RSACng(); //represents keys from other machine
-            Byte[] remotePrivateKey = remoteRSAKey.Key.Export(CngKeyBlobFormat.GenericPrivateBlob);
-            Byte[] remotePublicKey = remoteRSAKey.Key.Export(CngKeyBlobFormat.GenericPublicBlob);
-
-            //get local keys
-            Byte[] privateKey = RSAKey.Key.Export(CngKeyBlobFormat.GenericPrivateBlob); //exports private key as byte[]
-            Byte[] publicKey = RSAKey.Key.Export(CngKeyBlobFormat.GenericPublicBlob); //exports public key as byte
-
-            //encrypt with private key
-            CngKey privateCNGKey = CngKey.Import(privateKey, CngKeyBlobFormat.GenericPrivateBlob); //imports private key byte[]
-            RSACng encryptor = new RSACng(privateCNGKey); //creates RSACng with the key
-            messageBytes = encryptor.Encrypt(messageBytes, RSAEncryptionPadding.OaepSHA1);
-            Console.WriteLine("Encrypted message (private): "+Encoding.UTF8.GetString(messageBytes)+"\n\n");
-
-            //messageBytes = encryptor.Decrypt(messageBytes, RSAEncryptionPadding.OaepSHA512); //somehow works???
-            //Console.WriteLine("Encrypted message: " + Encoding.UTF8.GetString(messageBytes) + "\n\n"); 
-
-            //encrypt with public key
-            CngKey publicCNGKey = CngKey.Import(publicKey, CngKeyBlobFormat.GenericPublicBlob); //imports public key byte[]
-            encryptor = new RSACng(publicCNGKey); //creates RSACng with the key
-            messageBytes = encryptor.Encrypt(messageBytes, RSAEncryptionPadding.OaepSHA1);
-            Console.WriteLine("Encrypted message (public): " + Encoding.UTF8.GetString(messageBytes) + "\n\n");
-
-
-
-
-
-
-
-            publicCNGKey = CngKey.Import(publicKey, CngKeyBlobFormat.GenericPublicBlob); //imports private key byte[]
-            RSACng decryptor = new RSACng(privateCNGKey); //creates RSACng with the key
-            messageBytes = decryptor.Decrypt(messageBytes, RSAEncryptionPadding.OaepSHA512);
-            Console.WriteLine("Decrypted message: " + Encoding.UTF8.GetString(messageBytes) + "\n\n");
-
-            messageBytes = decryptor.Encrypt(messageBytes, RSAEncryptionPadding.OaepSHA512);
-            Console.WriteLine("Encrypted message: " + Encoding.UTF8.GetString(messageBytes) + "\n\n");
-
-
-
-
-
-
-
-
-
-
-
-
-            //Byte[] privateKey = RSAKey.Key.Export(CngKeyBlobFormat.GenericPrivateBlob);
-            //Byte[] publicKey = RSAKey.Key.Export(CngKeyBlobFormat.GenericPublicBlob); 
-            // RSAParameters publicKey = RSAKey.ExportParameters(false);
-            // RSAParameters privateKey = RSAKey.ExportParameters(true);
-
-
-            // RSACng encryptor = new RSACng(); //creates with random key
-            //Console.WriteLine(Encoding.UTF8.GetString(encryptor.ExportRSAPrivateKey())); //prints generated key
-
-            //  encryptor.ImportParameters(privateKey);
-            //Console.WriteLine(Encoding.UTF8.GetString(encryptor.ExportRSAPrivateKey())); //prints generated key
-            //  messageBtyes = encryptor.Encrypt(messageBtyes, RSAEncryptionPadding.OaepSHA512);
-            //  Console.WriteLine(Encoding.UTF8.GetString(messageBtyes));
-
-            //  messageBtyes = encryptor.Decrypt(messageBtyes, RSAEncryptionPadding.OaepSHA512);
-            //  Console.WriteLine(Encoding.UTF8.GetString(messageBtyes));
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-            //byte[] publickey = rsacrypto.exportrsapublickey();
-            //byte[] privatekey = rsacrypto.exportrsaprivatekey();
-            //cngkey key = cngkey.create(cngalgorithm.rsa);
-            //key.
-            ////encryptparams.
-            //console.writeline(message);
-            //byte[] messagebytes = encoding.utf8.getbytes(message); //write message
-            //messagebytes = rsacrypto.encrypt(messagebytes,rsaencryptionpadding.oaepsha512);
-            //console.writeline(encoding.utf8.getstring(messagebytes)); //write encrypted message
-            //messagebytes = rsacrypto.decrypt(messagebytes, rsaencryptionpadding.oaepsha512);
-            //console.writeline(encoding.utf8.getstring(messagebytes));
+            return signMessage(messageBytes);
         }
+
+        /// <summary>
+        /// Creates a signature of messageByte using this instances private key and SHA256
+        /// </summary>
+        /// <param name="messageBytes"></param>
+        /// <returns>
+        /// Byte array containing the signed hash of the message
+        /// </returns>
+        public static Byte[] signMessage(Byte[] messageBytes)
+        {
+            RSACryptoServiceProvider RSACSP = new RSACryptoServiceProvider(); //create CSP to perform functions
+            RSACSP.ImportParameters(rcsp.ExportParameters(true)); //give it applications private key
+
+            Byte[] signature = RSACSP.SignData(messageBytes, SHA256.Create()); //creates key
+            return signature;
+        }
+
     }
 }

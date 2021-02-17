@@ -57,7 +57,7 @@ namespace MessageApp
                     receiveKey();
                     send(message); //all synchronous and block while being done, the key exchange must be done first
                 }
-                catch(Exception e)
+                catch(SocketException e)
                 {
                     Console.WriteLine("Could not connect to endpoint");
                 }
@@ -87,9 +87,10 @@ namespace MessageApp
         //sends provided message to server
         private void send(string message)
         {
-            string privateKey = CryptoUtility.getPrivateKey();
-            string encMessage = CryptoUtility.encryptData(message, privateKey); //signes it with private key of sender
-            encMessage = CryptoUtility.encryptData(message, receivedPublicKeyString); //encrypts message with public key of recipient
+            //get signature of message
+            Byte[] signature = CryptoUtility.signMessage(message); //gets byte array representing signature of message signed with private key
+
+            String encMessage = CryptoUtility.encryptData(message, receivedPublicKeyString); //encrypts message with public key of recipient
             Console.WriteLine($"Encrypted message:\n{encMessage}\n/End encrypted message");
 
             //Byte[] messageByteArray = Encoding.UTF8.GetBytes(message.Trim() + "<EOF>"); //trims message, adds flag and then converts it to bytes
