@@ -135,7 +135,8 @@ namespace MessageApp
         }
 
         /// <summary>
-        /// 
+        /// Takes decrypted messageBytes, signed hash (signature) and senders public key.
+        /// Hashes messageBytes and signs with senders public key, compares received signature to new signature. They should be the same.
         /// </summary>
         /// <param name="messageBytes"> The decrypted bytes of the received message</param>
         /// <param name="receivedSignature"> The signature that was received in the transmission </param>
@@ -146,7 +147,7 @@ namespace MessageApp
             RSACryptoServiceProvider RSACSP = new RSACryptoServiceProvider(); //create CSP to perform functions
             RSACSP.ImportParameters(keyStringToRSAParam(senderPubKey)); //import public key of sender
 
-            Byte[] signedMessage = signMessage(messageBytes);
+            //Byte[] signedMessage = signMessage(messageBytes);
 
             bool valid;
 

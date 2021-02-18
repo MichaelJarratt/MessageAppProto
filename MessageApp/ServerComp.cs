@@ -86,26 +86,36 @@ namespace MessageApp
             BufferState bufferState = (BufferState)ar.AsyncState; //gets buffer from argument
             Socket receiveHandler = bufferState.socket; //socket has been receivng bytes between begin receive (or a previus loop of receiveBytes) and now
 
-            int totalLength = bufferState.totalLength;          //these need to be extraced from the transmission
-            int signatureLength = bufferState.signatureLength;
-            int messageLength = bufferState.messageLength;
-
             int bytesReceived = receiveHandler.EndReceive(ar); //gets number of bytes received, these bytes are stored in the bufferState
             int totalBytesReceived = bufferState.totalBytesReceived + bytesReceived; //self explanatory
 
             if (bytesReceived > 0) //if bytes were received during this cycle
             {
-                if (totalLength == 0 && totalBytesReceived >= 2) //if the first two bits have been received and total length has not been extracted yet
+                if (bufferState.totalLength == 0 && totalBytesReceived >= 2) //if the first two bits have been received and total length has not been extracted yet
                 {
                     bufferState.totalLength = lengthBytesToInt(new ArraySegment<Byte>(bufferState.bytes, 0, 2).ToArray()); //creates array containg first two bits of transmission and converts them to int (total length) 
                 }
-
-                if(totalLength != totalBytesReceived) //if not every byte has been received
+                if (bufferState.signatureLength == 0 && totalBytesReceived >= 4) //bytes 3&4 are signature length
+                {
+                    bufferState.signatureLength = lengthBytesToInt(new ArraySegment<Byte>(bufferState.bytes, 2, 2).ToArray()); 
+                }
+                if (bufferState.totalLength == 0 && totalBytesReceived >= 6) //bytes 5&6 are message length
+                {
+                    bufferState.totalLength = lengthBytesToInt(new ArraySegment<Byte>(bufferState.bytes, 4, 2).ToArray());
+                }
+                //only the lengths need to be extracted, the rest can be dealt with by the completeReceive function
+                if (bufferState.totalLength > totalBytesReceived) //if not every byte has been received
                 {
                     //repeat loop
                     receiveHandler.BeginReceive(bufferState.bytes, 0, BufferState.bufferSize, SocketFlags.None, new AsyncCallback(receiveBytes), bufferState);
                 }
-            }            
+                else if(bufferState.totalLength == totalBytesReceived) //every byte has been received
+                {
+                    completeReceive(bufferState); //pass everything off to complete receive for paring and validation
+                }
+            }
+            //arrive here if no more bytes were received
+            completeReceive(bufferState);
         }
 
         //  THREAD  //
@@ -142,7 +152,31 @@ namespace MessageApp
                 }
             }
             //arrive here when no bytes were received
-            //or when <EOF> were received
+            completeReceive(bufferState);
+        }
+
+        //callback called by receiveBytes, will use received key to decode message and the callback the message to MessageApp
+        private void completeReceive(BufferState bufferState)
+        {
+            //get signature bytes from bufferState
+            Byte[] signatureBytes = new ArraySegment<Byte>(bufferState.bytes, 6, bufferState.signatureLength).ToArray();
+            //get encrypted message bytes from bufferState
+            Byte[] messageBytes = new ArraySegment<Byte>(bufferState.bytes, 6 + bufferState.signatureLength, bufferState.messageLength).ToArray();
+            
+            //validate signature (inspect validateSignature to see how)
+            bool validSignature = CryptoUtility.validateSignature(messageBytes, signatureBytes, bufferState.keyString);
+
+            if (validSignature)
+            {
+                //decrypt message with private key and get its string
+                string message = CryptoUtility.decryptData(Encoding.UTF8.GetString(messageBytes), CryptoUtility.getPrivateKey());
+                messageAppReturn(message);
+            }
+            else
+            {
+                throw new Exception("Could not validate senders signature.");
+            }
+            
         }
 
         //decrypts the message and returns it to MessageApp
@@ -183,11 +217,6 @@ namespace MessageApp
             //Console.WriteLine("sent key: " + publicKey + "\n/end key\n\n");
         }
 
-        //callback called by receiveBytes, will use received key to decode message and the callback the message to MessageApp
-        private void completeReceive()
-        {
-
-        }
 
         public void setMessageCallback(Action<String> NewObj)
         {
