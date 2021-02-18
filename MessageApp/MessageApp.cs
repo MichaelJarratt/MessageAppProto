@@ -41,6 +41,14 @@ namespace MessageApp
         //entry point
         static void Main(string[] args)
         {
+
+            short totalLength = 1000;
+            byte[] lengthBytes = BitConverter.GetBytes(totalLength);
+            int totalLengthInt = BitConverter.ToInt16(lengthBytes, 0); //calculate int16 (two bytes) then implicitly typecast to regular int32
+
+            string test = "1234567890"; //byte array should be 10 bytes
+            byte[] testBytes = Encoding.UTF8.GetBytes(test);
+
             //CryptoUtility.encrypt("yee yee ass haircut");
             Console.WriteLine(args);
             MessageApp messageApp;

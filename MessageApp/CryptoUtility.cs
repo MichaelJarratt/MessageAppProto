@@ -129,8 +129,39 @@ namespace MessageApp
             RSACryptoServiceProvider RSACSP = new RSACryptoServiceProvider(); //create CSP to perform functions
             RSACSP.ImportParameters(rcsp.ExportParameters(true)); //give it applications private key
 
-            Byte[] signature = RSACSP.SignData(messageBytes, SHA256.Create()); //creates key
+            //Byte[] signature = RSACSP.SignData(messageBytes, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1); //creates key
+            Byte[] signature = RSACSP.SignData(messageBytes, SHA256.Create());
             return signature;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="messageBytes"> The decrypted bytes of the received message</param>
+        /// <param name="receivedSignature"> The signature that was received in the transmission </param>
+        /// <param name="senderPubKey"> The sender public key that was received before transmission </param>
+        /// <returns></returns>
+        public static bool validateSignature(Byte[] messageBytes, Byte[] receivedSignature, string senderPubKey)
+        {
+            RSACryptoServiceProvider RSACSP = new RSACryptoServiceProvider(); //create CSP to perform functions
+            RSACSP.ImportParameters(keyStringToRSAParam(senderPubKey)); //import public key of sender
+
+            Byte[] signedMessage = signMessage(messageBytes);
+
+            bool valid;
+
+            try
+            {
+               //valid = RSACSP.VerifyData(messageBytes, SHA1.Create(), receivedSignature);
+               valid = RSACSP.VerifyData(messageBytes, receivedSignature, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
+            }
+            catch (Exception)
+            {
+
+                return false;
+            }
+
+            return valid;
         }
 
     }

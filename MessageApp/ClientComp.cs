@@ -88,16 +88,33 @@ namespace MessageApp
         private void send(string message)
         {
             //get signature of message
-            Byte[] signatureBytes = CryptoUtility.signMessage(message); //gets byte array representing signature of message signed with private key
+            //Byte[] signatureBytes = CryptoUtility.signMessage(message); //gets byte array representing signature of message signed with private key
 
-            String encMessage = CryptoUtility.encryptData(message, receivedPublicKeyString); //encrypts message with public key of recipient
-            Console.WriteLine($"Encrypted message:\n{encMessage}\n/End encrypted message");
-            Byte[] messageByteArray = Encoding.UTF8.GetBytes(encMessage+ "<EOF>"); //adds flag to encrypted message and then converts it to bytes
 
-            //stick signature and message together
-            Byte[] transmissionBytes = new byte[253+messageByteArray.Length]; //signature is always 253 bytes
-            Array.Copy(signatureBytes, transmissionBytes, 253); //fills first 253 bytes of array with signature
-            Array.Copy(messageByteArray, 0, transmissionBytes, 254, messageByteArray.Length); //starting in position after signature bytes, add all message bytes
+            //String encMessage = CryptoUtility.encryptData(message, receivedPublicKeyString); //encrypts message with public key of recipient
+            //Byte[] messageBytes = Encoding.UTF8.GetBytes(encMessage+ "<EOF>"); //adds flag to encrypted message and then converts it to bytes
+            //Console.WriteLine($"Encrypted message:\n{encMessage}\n/End encrypted message");
+
+            //bool valid = CryptoUtility.validateSignature(Encoding.UTF8.GetBytes(message), signatureBytes, CryptoUtility.getPublicKey());
+
+            //Byte[] messageBytes = Encoding.UTF8.GetBytes(message); //gets array of bytes from message
+            Byte[] signatureBytes = CryptoUtility.signMessage(message); //creates signature for message
+            Byte[] messageBytes = Encoding.UTF8.GetBytes(CryptoUtility.encryptData(message,receivedPublicKeyString)); //creates byte array for encrypted message
+
+
+
+            int totalLength = signatureBytes.Length + messageBytes.Length + 6; //length of signature, message, itself and signature and message lengths //also I know it's a magic number but this is a prototype, no point setting up constants class for only this
+            Byte[] totalLengthBytes = lengthIntToBytes(totalLength); //two bytes
+            Byte[] signatureLengthBytes = lengthIntToBytes(signatureBytes.Length); //two bytes
+            Byte[] messageLengthBytes = lengthIntToBytes(messageBytes.Length); //two bytes
+
+            //stick lengths, signature and message together
+            Byte[] transmissionBytes = new byte[totalLength]; //signature is always 253 bytes
+            Array.Copy(totalLengthBytes, transmissionBytes, 2); //first two bytes - copies the two bytes from total length into transmission bytes
+            Array.Copy(signatureLengthBytes, 0 , transmissionBytes, 2, 2); //bytes 3&4 (2&3)
+            Array.Copy(messageLengthBytes, 0 , transmissionBytes, 4, 2); //bytes 5&6 (4&5)
+            Array.Copy(signatureBytes,0 , transmissionBytes, 6, signatureBytes.Length); //starting after lengths, insert signature bytes (always 253)
+            Array.Copy(messageBytes, 0, transmissionBytes, 6+signatureBytes.Length, messageBytes.Length); //starting in position after signature bytes, add all message bytes
 
             Console.WriteLine("signature: " + System.Convert.ToBase64String(signatureBytes));
 
@@ -114,6 +131,13 @@ namespace MessageApp
                 Console.WriteLine("Socket error code: " + e.ErrorCode);
                 Console.WriteLine(e.Message);
             }
+        }
+
+        //takes int32 number, typecasts to int16, converts it to Byte[] with two elements and returns it
+        private Byte[] lengthIntToBytes(int length)
+        {
+            short shortLength = (short) length; //typecast to short (anything greater than 65,536 will either throw exception or loose precision
+            return BitConverter.GetBytes(shortLength);
         }
 
         //offers way to begin the main loop
