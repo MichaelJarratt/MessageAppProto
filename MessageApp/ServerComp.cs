@@ -80,7 +80,10 @@ namespace MessageApp
             bufferState.keyString = keyString; //stores senders public key in bufferState
             receiveHandler.BeginReceive(bufferState.bytes, 0, BufferState.bufferSize, SocketFlags.None, new AsyncCallback(receiveBytes), bufferState); //stores received bytes in bufferState.bytes
         }
-        
+
+        //  THREAD  //
+        //started when a request is accepted, and a socket is created to receive the bits.
+        //handles receiving the bytes and continuing until they are all received (see below) then passing them off to completeReceive for parsing.
         private void receiveBytes(IAsyncResult ar)
         {
             BufferState bufferState = (BufferState)ar.AsyncState; //gets buffer from argument
@@ -97,7 +100,7 @@ namespace MessageApp
                 }
                 if (bufferState.signatureLength == 0 && totalBytesReceived >= 4) //bytes 3&4 are signature length
                 {
-                    bufferState.signatureLength = lengthBytesToInt(new ArraySegment<Byte>(bufferState.bytes, 2, 2).ToArray()); 
+                    bufferState.signatureLength = lengthBytesToInt(new ArraySegment<Byte>(bufferState.bytes, 2, 2).ToArray());
                 }
                 if (bufferState.messageLength == 0 && totalBytesReceived >= 6) //bytes 5&6 are message length
                 {
@@ -109,49 +112,12 @@ namespace MessageApp
                     //repeat loop
                     receiveHandler.BeginReceive(bufferState.bytes, 0, BufferState.bufferSize, SocketFlags.None, new AsyncCallback(receiveBytes), bufferState);
                 }
-                else if(bufferState.totalLength == totalBytesReceived) //every byte has been received
+                else if (bufferState.totalLength == totalBytesReceived) //every byte has been received
                 {
                     completeReceive(bufferState); //pass everything off to complete receive for paring and validation
                 }
             }
             //arrive here if no more bytes were received
-            completeReceive(bufferState);
-        }
-
-        //  THREAD  //
-        //started when a request is accepted, and a socket is created to receive the bits.
-        //handles receiving the bytes and then displaying the message when at <EOF>
-        private void receiveBytes2(IAsyncResult ar)
-        {
-            //Console.WriteLine("receive cycle");
-            //extract socket and buffer from argument
-            BufferState bufferState = (BufferState)ar.AsyncState; //gets the buffer from the argument
-            Socket receiveHandler = bufferState.socket; //between beginReceive and now the receiver has been getting bits
-
-            string messageString = String.Empty;
-            int bytesReceived = receiveHandler.EndReceive(ar); //why does ar need to be passed?
-
-            if(bytesReceived > 0) //if any bytes were received this cycle
-            {
-                bufferState.stringBuilder.Append(Encoding.UTF8.GetString(bufferState.bytes, 0, bytesReceived)); //convert received bytes stored in buffer to a mutable string, bytes buffer is overwritten each time
-                messageString = bufferState.stringBuilder.ToString(); //converts stringbuilder to string
-
-                if (messageString.IndexOf("<EOF>") != -1) //if the end of file tag has been received (transmission has completed)
-                {
-                    messageString = messageString.Substring(0, messageString.Length - 5); //removes <EOF> tag
-                    //Console.WriteLine($"--{content}--"); //print received message to console
-                    //Console.WriteLine(messageString);
-                    //Console.WriteLine();
-                    decryptMessage(messageString,bufferState); //decrypt message, senders public key is stored in bufferState
-                }
-                else //transmission is still going but has not finished yet
-                {
-                    //begin a new instance of this thread, presumably terminating this one
-                    //note that buffer is passed again, meaning state is maintained between instances of this thread
-                    receiveHandler.BeginReceive(bufferState.bytes, 0, BufferState.bufferSize, SocketFlags.None, new AsyncCallback(receiveBytes), bufferState);
-                }
-            }
-            //arrive here when no bytes were received
             completeReceive(bufferState);
         }
 
@@ -181,23 +147,6 @@ namespace MessageApp
                 throw new Exception("Could not validate senders signature.");
             }
             
-        }
-
-        //decrypts the message and returns it to MessageApp
-        private void decryptMessage(string messageString, BufferState bufferState)
-        {
-            Byte[] signature = new byte[253];
-            Array.Copy(bufferState.bytes, signature, 253); //takes the first 253 bytes (signature) from buffer
-            Console.WriteLine("signature: "+System.Convert.ToBase64String(signature));
-
-            Byte[] messageBytes = new byte[bufferState.bytes.Length];
-
-            string privateKey = CryptoUtility.getPrivateKey(); //gets string represenation of receivers private key
-            messageString = CryptoUtility.decryptData(messageString, privateKey); //decrypts message with private key
-
-            //Console.WriteLine($"Received encrypted message:\n{messageString}\nMessage end.");
-            
-            messageAppReturn(messageString);
         }
 
         // synchronously accepts the public key of the client

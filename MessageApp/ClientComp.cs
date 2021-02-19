@@ -87,21 +87,8 @@ namespace MessageApp
         //sends provided message to server
         private void send(string message)
         {
-            //get signature of message
-            //Byte[] signatureBytes = CryptoUtility.signMessage(message); //gets byte array representing signature of message signed with private key
-
-
-            //String encMessage = CryptoUtility.encryptData(message, receivedPublicKeyString); //encrypts message with public key of recipient
-            //Byte[] messageBytes = Encoding.UTF8.GetBytes(encMessage+ "<EOF>"); //adds flag to encrypted message and then converts it to bytes
-            //Console.WriteLine($"Encrypted message:\n{encMessage}\n/End encrypted message");
-
-            //bool valid = CryptoUtility.validateSignature(Encoding.UTF8.GetBytes(message), signatureBytes, CryptoUtility.getPublicKey());
-
-            //Byte[] messageBytes = Encoding.UTF8.GetBytes(message); //gets array of bytes from message
             Byte[] signatureBytes = CryptoUtility.signMessage(message); //creates signature for message
             Byte[] messageBytes = Encoding.UTF8.GetBytes(CryptoUtility.encryptData(message,receivedPublicKeyString)); //creates byte array for encrypted message
-
-
 
             int totalLength = signatureBytes.Length + messageBytes.Length + 6; //length of signature, message, itself and signature and message lengths //also I know it's a magic number but this is a prototype, no point setting up constants class for only this
             Byte[] totalLengthBytes = lengthIntToBytes(totalLength); //two bytes
