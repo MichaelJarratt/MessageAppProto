@@ -118,7 +118,7 @@ namespace MessageApp
                 }
             }
             //arrive here if no more bytes were received
-            completeReceive(bufferState);
+            //completeReceive(bufferState);
         }
 
         //callback called by receiveBytes.
