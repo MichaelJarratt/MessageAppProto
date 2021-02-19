@@ -116,7 +116,7 @@ namespace MessageApp
             Array.Copy(signatureBytes,0 , transmissionBytes, 6, signatureBytes.Length); //starting after lengths, insert signature bytes (always 253)
             Array.Copy(messageBytes, 0, transmissionBytes, 6+signatureBytes.Length, messageBytes.Length); //starting in position after signature bytes, add all message bytes
 
-            Console.WriteLine("signature: " + System.Convert.ToBase64String(signatureBytes));
+            //Console.WriteLine("signature: " + System.Convert.ToBase64String(signatureBytes));
 
             //sendSocket = new Socket(IPAddress.Parse(targetIP).AddressFamily, SocketType.Stream, ProtocolType.Tcp); //has to be reinstantiated for reasons
             try

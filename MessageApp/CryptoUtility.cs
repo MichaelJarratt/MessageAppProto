@@ -154,7 +154,7 @@ namespace MessageApp
             try
             {
                //valid = RSACSP.VerifyData(messageBytes, SHA1.Create(), receivedSignature);
-               valid = RSACSP.VerifyData(messageBytes, receivedSignature, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
+               valid = RSACSP.VerifyData(messageBytes, receivedSignature, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1); //I have no idea why this one works and the other doesn't. fuck it.
             }
             catch (Exception)
             {

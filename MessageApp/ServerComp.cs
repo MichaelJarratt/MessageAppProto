@@ -99,9 +99,9 @@ namespace MessageApp
                 {
                     bufferState.signatureLength = lengthBytesToInt(new ArraySegment<Byte>(bufferState.bytes, 2, 2).ToArray()); 
                 }
-                if (bufferState.totalLength == 0 && totalBytesReceived >= 6) //bytes 5&6 are message length
+                if (bufferState.messageLength == 0 && totalBytesReceived >= 6) //bytes 5&6 are message length
                 {
-                    bufferState.totalLength = lengthBytesToInt(new ArraySegment<Byte>(bufferState.bytes, 4, 2).ToArray());
+                    bufferState.messageLength = lengthBytesToInt(new ArraySegment<Byte>(bufferState.bytes, 4, 2).ToArray());
                 }
                 //only the lengths need to be extracted, the rest can be dealt with by the completeReceive function
                 if (bufferState.totalLength > totalBytesReceived) //if not every byte has been received
@@ -155,21 +155,25 @@ namespace MessageApp
             completeReceive(bufferState);
         }
 
-        //callback called by receiveBytes, will use received key to decode message and the callback the message to MessageApp
+        //callback called by receiveBytes.
+        //will extract the signature and encrypted message from the transmission bytes.
+        //decrypts message using received public key of sender.
+        //validates the signature.
         private void completeReceive(BufferState bufferState)
         {
             //get signature bytes from bufferState
             Byte[] signatureBytes = new ArraySegment<Byte>(bufferState.bytes, 6, bufferState.signatureLength).ToArray();
             //get encrypted message bytes from bufferState
             Byte[] messageBytes = new ArraySegment<Byte>(bufferState.bytes, 6 + bufferState.signatureLength, bufferState.messageLength).ToArray();
-            
+
+            //decrypt message with private key and get its string
+            string message = CryptoUtility.decryptData(Encoding.UTF8.GetString(messageBytes), CryptoUtility.getPrivateKey());
+
             //validate signature (inspect validateSignature to see how)
-            bool validSignature = CryptoUtility.validateSignature(messageBytes, signatureBytes, bufferState.keyString);
+            bool validSignature = CryptoUtility.validateSignature(Encoding.UTF8.GetBytes(message), signatureBytes, bufferState.keyString);
 
             if (validSignature)
             {
-                //decrypt message with private key and get its string
-                string message = CryptoUtility.decryptData(Encoding.UTF8.GetString(messageBytes), CryptoUtility.getPrivateKey());
                 messageAppReturn(message);
             }
             else
