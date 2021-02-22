@@ -51,7 +51,7 @@ namespace MessageApp
             {
                 blockConnectionListenLoop.Reset(); //makes threads set to "wait one" be blocked
                 
-                connectionListener.BeginAccept(new AsyncCallback(acceptTCPRequest), connectionListener); //when receiving a request it creates a new thread (acceptTCPRequest
+                connectionListener.BeginAccept(new AsyncCallback(acceptTCPRequest), connectionListener); //when receiving a request it creates a new thread acceptTCPRequest
                 blockConnectionListenLoop.WaitOne();
             }
         }
