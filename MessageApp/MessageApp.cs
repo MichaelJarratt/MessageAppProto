@@ -8,6 +8,9 @@ using System.Timers;
 
 namespace MessageApp
 {
+    /*
+     * this is the messageapp console interface
+     */
     class MessageApp
     {
         public int localPortNo; //port to listen to

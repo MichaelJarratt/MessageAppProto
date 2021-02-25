@@ -5,6 +5,8 @@ using System.Net;
 using System.Threading;
 using System.Net.Sockets;
 
+using System.Diagnostics; //temporarily here for stopwatch
+
 namespace MessageApp
 {
     class ClientComp
@@ -16,6 +18,8 @@ namespace MessageApp
         IPEndPoint targetEndPoint; //ip/port combo to send messages to
 
         private string receivedPublicKeyString;
+
+        private Stopwatch stopwatch = new Stopwatch(); //temporary
 
         public ClientComp(string targetIP)
         {
@@ -47,6 +51,7 @@ namespace MessageApp
             {
                 Console.WriteLine("Send message:");
                 String message = Console.ReadLine(); //pauses execution /of this thread/ while waiting for input
+                stopwatch.Start(); //temporary
                 sendSocket = new Socket(IPAddress.Parse(targetIP).AddressFamily, SocketType.Stream, ProtocolType.Tcp); //has to be reinstantiated for reasons
                 try
                 {
@@ -114,10 +119,20 @@ namespace MessageApp
             }
             catch (SocketException e)
             {
-                Console.WriteLine("Could not connect to target");
-                Console.WriteLine("Socket error code: " + e.ErrorCode);
-                Console.WriteLine(e.Message);
+                //this is the only "expected" exception
+                if (e.SocketErrorCode == SocketError.TimedOut)
+                {
+                    Console.WriteLine("Could not connect to target");
+                }
+                else
+                {
+                    Console.WriteLine("Socket error code: " + e.ErrorCode);
+                    Console.WriteLine(e.Message);
+                }
             }
+            stopwatch.Stop();
+            Console.WriteLine($"Time Elapsed: {stopwatch.ElapsedMilliseconds}");
+            stopwatch.Reset();
         }
 
         //takes int32 number, typecasts to int16, converts it to Byte[] with two elements and returns it
