@@ -5,7 +5,9 @@ VisualStudioVersion = 16.0.30523.141
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MessageApp", "MessageApp\MessageApp.csproj", "{0F565F84-9C97-434B-9BDF-7FF52FFF9E49}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MessageAppGUI", "MessageAppGUI\MessageAppGUI.csproj", "{D1F4ACB1-6B08-4895-AE0F-E09412A8EE3D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MessageAppGUI", "MessageAppGUI\MessageAppGUI.csproj", "{D1F4ACB1-6B08-4895-AE0F-E09412A8EE3D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tests", "Tests\Tests.csproj", "{639FDD38-E5D3-4C60-9E9F-0756D81019EA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{D1F4ACB1-6B08-4895-AE0F-E09412A8EE3D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D1F4ACB1-6B08-4895-AE0F-E09412A8EE3D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D1F4ACB1-6B08-4895-AE0F-E09412A8EE3D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{639FDD38-E5D3-4C60-9E9F-0756D81019EA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{639FDD38-E5D3-4C60-9E9F-0756D81019EA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{639FDD38-E5D3-4C60-9E9F-0756D81019EA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{639FDD38-E5D3-4C60-9E9F-0756D81019EA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

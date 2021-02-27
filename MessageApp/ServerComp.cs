@@ -90,29 +90,29 @@ namespace MessageApp
             Socket receiveHandler = bufferState.socket; //socket has been receivng bytes between begin receive (or a previus loop of receiveBytes) and now
 
             int bytesReceived = receiveHandler.EndReceive(ar); //gets number of bytes received, these bytes are stored in the bufferState
-            int totalBytesReceived = bufferState.totalBytesReceived + bytesReceived; //self explanatory
+            bufferState.totalBytesReceived = bufferState.totalBytesReceived + bytesReceived; //self explanatory
 
             if (bytesReceived > 0) //if bytes were received during this cycle
             {
-                if (bufferState.totalLength == 0 && totalBytesReceived >= 2) //if the first two bits have been received and total length has not been extracted yet
+                if (bufferState.totalLength == 0 && bufferState.totalBytesReceived >= 2) //if the first two bits have been received and total length has not been extracted yet
                 {
                     bufferState.totalLength = lengthBytesToInt(new ArraySegment<Byte>(bufferState.bytes, 0, 2).ToArray()); //creates array containg first two bits of transmission and converts them to int (total length) 
                 }
-                if (bufferState.signatureLength == 0 && totalBytesReceived >= 4) //bytes 3&4 are signature length
+                if (bufferState.signatureLength == 0 && bufferState.totalBytesReceived >= 4) //bytes 3&4 are signature length
                 {
                     bufferState.signatureLength = lengthBytesToInt(new ArraySegment<Byte>(bufferState.bytes, 2, 2).ToArray());
                 }
-                if (bufferState.messageLength == 0 && totalBytesReceived >= 6) //bytes 5&6 are message length
+                if (bufferState.messageLength == 0 && bufferState.totalBytesReceived >= 6) //bytes 5&6 are message length
                 {
                     bufferState.messageLength = lengthBytesToInt(new ArraySegment<Byte>(bufferState.bytes, 4, 2).ToArray());
                 }
                 //only the lengths need to be extracted, the rest can be dealt with by the completeReceive function
-                if (bufferState.totalLength > totalBytesReceived) //if not every byte has been received
+                if (bufferState.totalLength > bufferState.totalBytesReceived) //if not every byte has been received
                 {
                     //repeat loop
                     receiveHandler.BeginReceive(bufferState.bytes, 0, BufferState.bufferSize, SocketFlags.None, new AsyncCallback(receiveBytes), bufferState);
                 }
-                else if (bufferState.totalLength == totalBytesReceived) //every byte has been received
+                else if (bufferState.totalLength == bufferState.totalBytesReceived) //every byte has been received
                 {
                     completeReceive(bufferState); //pass everything off to complete receive for paring and validation
                 }
@@ -188,7 +188,7 @@ namespace MessageApp
     //this class is responsible for representing the state of a receiving buffer
     public class BufferState
     {
-        public const int bufferSize = 1024; //size of buffer used to receive bytes
+        public const int bufferSize = 2024; //size of buffer used to receive bytes
         public byte[] bytes = new byte[bufferSize]; //buffer used to receive bytes
         public StringBuilder stringBuilder = new StringBuilder(); //used to build strings from bytes in the buffer
         public Socket socket = null; //the socket this is acting as the buffer for
