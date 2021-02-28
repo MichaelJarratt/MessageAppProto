@@ -15,10 +15,10 @@ namespace MessageApp
         private Socket connectionListener; //socker that listens for incoming connections
         private ManualResetEvent blockConnectionListenLoop; //blocks loop listening to connections until a connection is received
         
-        Action<String> messageAppReturn; // Action can hold a reference to a method, this references the call back handler on MessageApp that prints the received message
+        Action<String> controllerReturn; // Action can hold a reference to a method, this references the call back handler on MessageApp that prints the received message
         //Action<String> is a void return method that takes one string. Action<String,String> takes two
         //Func<String,String> is a String return method that takes one string. Func<String,String,String> takes two strings.
-        Action<int> messageAppReceiveErrorReport; //used to inform controller of errors receiving transmissions
+        Action<int> controllerReceiveErrorReport; //used to inform controller of errors receiving transmissions
 
         public ServerComp()
         {
@@ -162,7 +162,8 @@ namespace MessageApp
 
             if (validSignature)
             {
-                messageAppReturn(message);
+                bufferState.socket.Send(Encoding.UTF8.GetBytes("received")); //send confirmation of successful receive
+                controllerReturn(message);
             }
             else
             {
@@ -175,7 +176,7 @@ namespace MessageApp
         private void reportReceiveError(int code)
         {
             //Console.WriteLine($"receive error - code {code}");
-            messageAppReceiveErrorReport(code);
+            controllerReceiveErrorReport(code);
         }
 
         // synchronously accepts the public key of the client
@@ -202,11 +203,11 @@ namespace MessageApp
 
         public void setMessageCallback(Action<String> newObj)
         {
-            messageAppReturn = newObj;
+            controllerReturn = newObj;
         }
         public void setReceiveErrorCallback(Action<int> newObj)
         {
-            messageAppReceiveErrorReport = newObj;
+            controllerReceiveErrorReport = newObj;
         }
 
         //converts two bytes to an integer

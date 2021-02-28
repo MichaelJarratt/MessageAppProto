@@ -19,6 +19,8 @@ namespace MessageApp
 
         private string receivedPublicKeyString;
 
+        private Action<int> controllerSendErrorReport; //callback method to inform controller of a send error
+
         private Stopwatch stopwatch = new Stopwatch(); //temporary
 
         public ClientComp(string targetIP)
@@ -121,6 +123,12 @@ namespace MessageApp
             {
                 //sendSocket.Connect(targetEndPoint); // tries to connect to another client
                 sendSocket.Send(transmissionBytes); //sends message synchronously
+
+                int confirmationBytes = sendSocket.Receive(new byte[1024]); //don't care what is received, just that something is
+                if(confirmationBytes == 0)
+                {
+                    controllerSendErrorReport(1); //1 = send error
+                }
                 //sendSocket.Close();
             }
             catch (SocketException e)
@@ -139,6 +147,11 @@ namespace MessageApp
             stopwatch.Stop();
             Console.WriteLine($"Time Elapsed: {stopwatch.ElapsedMilliseconds}");
             stopwatch.Reset();
+        }
+
+        public void setSendErrorCallBack(Action<int> newObj)
+        {
+            controllerSendErrorReport = newObj;
         }
 
         //takes int32 number, typecasts to int16, converts it to Byte[] with two elements and returns it
