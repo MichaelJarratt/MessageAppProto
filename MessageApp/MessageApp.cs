@@ -50,7 +50,14 @@ namespace MessageApp
 
         public void messageSendErrorCallbackHandler(int code)
         {
-            Console.WriteLine("Error sending message");
+            if(code == 1)
+            {
+                Console.WriteLine("Error sending message");
+            }
+            else if (code == 2)
+            {
+                Console.WriteLine("Could not connect to target");
+            }
         }
 
         //entry point

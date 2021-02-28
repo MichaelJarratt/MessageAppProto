@@ -136,12 +136,14 @@ namespace MessageApp
                 //this is the only "expected" exception
                 if (e.SocketErrorCode == SocketError.TimedOut)
                 {
-                    Console.WriteLine("Could not connect to target");
+                    //Console.WriteLine("Could not connect to target");
+                    controllerSendErrorReport(2); //could not connect to target
                 }
                 else
                 {
-                    Console.WriteLine("Socket error code: " + e.ErrorCode);
-                    Console.WriteLine(e.Message);
+                    //Console.WriteLine("Socket error code: " + e.ErrorCode);
+                    //Console.WriteLine(e.Message);
+                    controllerSendErrorReport(1);
                 }
             }
             stopwatch.Stop();
