@@ -24,6 +24,7 @@ namespace MessageApp
             ClientComp clientComp = new ClientComp(targetIP.ToString());
             ServerComp serverComp = new ServerComp();
             serverComp.setMessageCallback(getMessageCallbackHandler);
+            serverComp.setReceiveErrorCallback(messageReceiveErrorCallbackHandler);
 
             Console.WriteLine($"Listening on port {localPortNo}");
             Console.WriteLine($"Listening on IP <all interfaces>");
@@ -39,6 +40,11 @@ namespace MessageApp
         public void getMessageCallbackHandler(string message)
         {
             Console.WriteLine($"Received message: {message}");
+        }
+
+        public void messageReceiveErrorCallbackHandler(int code)
+        {
+            Console.WriteLine($"Error receiving message - code {code}");
         }
 
         //entry point

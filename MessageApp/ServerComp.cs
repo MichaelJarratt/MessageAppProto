@@ -18,6 +18,7 @@ namespace MessageApp
         Action<String> messageAppReturn; // Action can hold a reference to a method, this references the call back handler on MessageApp that prints the received message
         //Action<String> is a void return method that takes one string. Action<String,String> takes two
         //Func<String,String> is a String return method that takes one string. Func<String,String,String> takes two strings.
+        Action<int> messageAppReceiveErrorReport; //used to inform controller of errors receiving transmissions
 
         public ServerComp()
         {
@@ -107,18 +108,39 @@ namespace MessageApp
                     bufferState.messageLength = lengthBytesToInt(new ArraySegment<Byte>(bufferState.bytes, 4, 2).ToArray());
                 }
                 //only the lengths need to be extracted, the rest can be dealt with by the completeReceive function
-                if (bufferState.totalLength > bufferState.totalBytesReceived) //if not every byte has been received
+                if (bufferState.totalBytesReceived < bufferState.totalLength) //if not every byte has been received
                 {
                     //repeat loop
                     receiveHandler.BeginReceive(bufferState.bytes, 0, BufferState.bufferSize, SocketFlags.None, new AsyncCallback(receiveBytes), bufferState);
                 }
                 else if (bufferState.totalLength == bufferState.totalBytesReceived) //every byte has been received
                 {
-                    completeReceive(bufferState); //pass everything off to complete receive for paring and validation
+                    try
+                    {
+                        completeReceive(bufferState); //pass everything off to complete receive for paring and validation
+                    }
+                    catch (Exception e)
+                    {
+                        if(String.Equals(e.Message, "Could not validate senders signature."))
+                        {
+                            reportReceiveError(3); //invalid signature
+                        }
+                        else
+                        {
+                            reportReceiveError(2); //errors decrypting and validating
+                        }
+                    }
+                }
+                else if (bufferState.totalLength != bufferState.totalBytesReceived) //transmission error (total length too short)
+                {
+                    reportReceiveError(1); //total length error
                 }
             }
-            //arrive here if no more bytes were received
-            //completeReceive(bufferState);
+            else //if no bytes were received, then a transmission error probably ocurred (total length too long)
+            {
+                //arrive here if no more bytes were received
+                reportReceiveError(1); //total length error
+            }
         }
 
         //callback called by receiveBytes.
@@ -149,6 +171,13 @@ namespace MessageApp
             
         }
 
+        //calls callback method of controller to inform it that some error occured 
+        private void reportReceiveError(int code)
+        {
+            //Console.WriteLine($"receive error - code {code}");
+            messageAppReceiveErrorReport(code);
+        }
+
         // synchronously accepts the public key of the client
         private string receiveKey(Socket receiveHandler)
         {
@@ -171,9 +200,13 @@ namespace MessageApp
         }
 
 
-        public void setMessageCallback(Action<String> NewObj)
+        public void setMessageCallback(Action<String> newObj)
         {
-            messageAppReturn = NewObj;
+            messageAppReturn = newObj;
+        }
+        public void setReceiveErrorCallback(Action<int> newObj)
+        {
+            messageAppReceiveErrorReport = newObj;
         }
 
         //converts two bytes to an integer
@@ -188,7 +221,7 @@ namespace MessageApp
     //this class is responsible for representing the state of a receiving buffer
     public class BufferState
     {
-        public const int bufferSize = 2024; //size of buffer used to receive bytes
+        public const int bufferSize = 2048; //size of buffer used to receive bytes
         public byte[] bytes = new byte[bufferSize]; //buffer used to receive bytes
         public StringBuilder stringBuilder = new StringBuilder(); //used to build strings from bytes in the buffer
         public Socket socket = null; //the socket this is acting as the buffer for

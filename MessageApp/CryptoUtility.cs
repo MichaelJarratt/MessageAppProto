@@ -9,7 +9,7 @@ namespace MessageApp
     public static class CryptoUtility
     {
 
-        static RSACryptoServiceProvider rcsp = new RSACryptoServiceProvider(2048); //keeps the key to use during instance lifetime
+        static RSACryptoServiceProvider rcsp = new RSACryptoServiceProvider(4096); //keeps the key to use during instance lifetime
         //static RSAEncryptionPadding padding = new RSAEncryptionPadding();
 
         /// <summary>

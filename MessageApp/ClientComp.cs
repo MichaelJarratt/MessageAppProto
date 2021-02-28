@@ -100,6 +100,12 @@ namespace MessageApp
             Byte[] signatureLengthBytes = lengthIntToBytes(signatureBytes.Length); //two bytes
             Byte[] messageLengthBytes = lengthIntToBytes(messageBytes.Length); //two bytes
 
+            //temporary - testing what happens when corruption occurs
+            //totalLengthBytes = lengthIntToBytes(1500);
+            //signatureLengthBytes = lengthIntToBytes(260); 
+            messageLengthBytes = lengthIntToBytes(2000);
+
+
             //stick lengths, signature and message together
             Byte[] transmissionBytes = new byte[totalLength]; //signature is always 253 bytes
             Array.Copy(totalLengthBytes, transmissionBytes, 2); //first two bytes - copies the two bytes from total length into transmission bytes
