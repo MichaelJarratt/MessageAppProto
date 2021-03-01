@@ -34,26 +34,31 @@
             this.contactsLabel = new System.Windows.Forms.Label();
             this.contactAddButton = new System.Windows.Forms.Button();
             this.addContactsPanel = new System.Windows.Forms.Panel();
+            this.contactAddFinishButton = new System.Windows.Forms.Button();
             this.contactIPTextbox = new System.Windows.Forms.TextBox();
             this.contactNameTextbox = new System.Windows.Forms.TextBox();
             this.iPLabel = new System.Windows.Forms.Label();
             this.nameLabel = new System.Windows.Forms.Label();
             this.addContactsLabel = new System.Windows.Forms.Label();
             this.toolTipHandler = new System.Windows.Forms.ToolTip(this.components);
+            this.messageParentPanel = new System.Windows.Forms.Panel();
+            this.messagingPanel = new System.Windows.Forms.Panel();
+            this.messageSendButton = new System.Windows.Forms.Button();
+            this.messageTextBox = new System.Windows.Forms.TextBox();
+            this.messageDisplayPanel = new System.Windows.Forms.Panel();
             ((System.ComponentModel.ISupportInitialize)(this.bindingSource1)).BeginInit();
             this.addContactsPanel.SuspendLayout();
+            this.messageParentPanel.SuspendLayout();
+            this.messagingPanel.SuspendLayout();
             this.SuspendLayout();
             // 
             // contactsPanel
             // 
-            this.contactsPanel.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left)));
             this.contactsPanel.AutoScroll = true;
-            this.contactsPanel.AutoSize = true;
             this.contactsPanel.BackColor = System.Drawing.Color.Silver;
             this.contactsPanel.Location = new System.Drawing.Point(0, 54);
             this.contactsPanel.Name = "contactsPanel";
-            this.contactsPanel.Size = new System.Drawing.Size(362, 498);
+            this.contactsPanel.Size = new System.Drawing.Size(360, 499);
             this.contactsPanel.TabIndex = 0;
             // 
             // contactsLabel
@@ -86,6 +91,7 @@
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.addContactsPanel.BackColor = System.Drawing.Color.Silver;
+            this.addContactsPanel.Controls.Add(this.contactAddFinishButton);
             this.addContactsPanel.Controls.Add(this.contactIPTextbox);
             this.addContactsPanel.Controls.Add(this.contactNameTextbox);
             this.addContactsPanel.Controls.Add(this.iPLabel);
@@ -95,6 +101,18 @@
             this.addContactsPanel.Name = "addContactsPanel";
             this.addContactsPanel.Size = new System.Drawing.Size(868, 553);
             this.addContactsPanel.TabIndex = 3;
+            // 
+            // contactAddFinishButton
+            // 
+            this.contactAddFinishButton.BackColor = System.Drawing.Color.DarkGray;
+            this.contactAddFinishButton.Font = new System.Drawing.Font("Segoe UI", 20F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.contactAddFinishButton.Location = new System.Drawing.Point(314, 367);
+            this.contactAddFinishButton.Name = "contactAddFinishButton";
+            this.contactAddFinishButton.Size = new System.Drawing.Size(187, 48);
+            this.contactAddFinishButton.TabIndex = 2;
+            this.contactAddFinishButton.Text = "Add";
+            this.contactAddFinishButton.UseVisualStyleBackColor = false;
+            this.contactAddFinishButton.Click += new System.EventHandler(this.contactAddFinishButton_Click);
             // 
             // contactIPTextbox
             // 
@@ -145,11 +163,65 @@
             // 
             this.toolTipHandler.Popup += new System.Windows.Forms.PopupEventHandler(this.toolTip1_Popup);
             // 
+            // messageParentPanel
+            // 
+            this.messageParentPanel.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.messageParentPanel.BackColor = System.Drawing.Color.Silver;
+            this.messageParentPanel.Controls.Add(this.messageDisplayPanel);
+            this.messageParentPanel.Controls.Add(this.messagingPanel);
+            this.messageParentPanel.Location = new System.Drawing.Point(366, 0);
+            this.messageParentPanel.Name = "messageParentPanel";
+            this.messageParentPanel.Size = new System.Drawing.Size(868, 553);
+            this.messageParentPanel.TabIndex = 0;
+            // 
+            // messagingPanel
+            // 
+            this.messagingPanel.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.messagingPanel.BackColor = System.Drawing.Color.LightGray;
+            this.messagingPanel.Controls.Add(this.messageSendButton);
+            this.messagingPanel.Controls.Add(this.messageTextBox);
+            this.messagingPanel.Location = new System.Drawing.Point(0, 435);
+            this.messagingPanel.Name = "messagingPanel";
+            this.messagingPanel.Size = new System.Drawing.Size(868, 118);
+            this.messagingPanel.TabIndex = 0;
+            // 
+            // messageSendButton
+            // 
+            this.messageSendButton.Location = new System.Drawing.Point(752, 17);
+            this.messageSendButton.Name = "messageSendButton";
+            this.messageSendButton.Size = new System.Drawing.Size(75, 61);
+            this.messageSendButton.TabIndex = 1;
+            this.messageSendButton.Text = "button1";
+            this.messageSendButton.UseVisualStyleBackColor = true;
+            // 
+            // messageTextBox
+            // 
+            this.messageTextBox.Location = new System.Drawing.Point(48, 22);
+            this.messageTextBox.Multiline = true;
+            this.messageTextBox.Name = "messageTextBox";
+            this.messageTextBox.Size = new System.Drawing.Size(625, 83);
+            this.messageTextBox.TabIndex = 0;
+            // 
+            // messageDisplayPanel
+            // 
+            this.messageDisplayPanel.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.messageDisplayPanel.AutoScroll = true;
+            this.messageDisplayPanel.Location = new System.Drawing.Point(2, 12);
+            this.messageDisplayPanel.Name = "messageDisplayPanel";
+            this.messageDisplayPanel.Size = new System.Drawing.Size(866, 417);
+            this.messageDisplayPanel.TabIndex = 1;
+            // 
             // MessageAppForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1233, 552);
+            this.Controls.Add(this.messageParentPanel);
             this.Controls.Add(this.addContactsPanel);
             this.Controls.Add(this.contactAddButton);
             this.Controls.Add(this.contactsLabel);
@@ -159,8 +231,10 @@
             ((System.ComponentModel.ISupportInitialize)(this.bindingSource1)).EndInit();
             this.addContactsPanel.ResumeLayout(false);
             this.addContactsPanel.PerformLayout();
+            this.messageParentPanel.ResumeLayout(false);
+            this.messagingPanel.ResumeLayout(false);
+            this.messagingPanel.PerformLayout();
             this.ResumeLayout(false);
-            this.PerformLayout();
 
         }
 
@@ -178,13 +252,19 @@
 
         //private System.Windows.Forms.Panel ContactsPanel;
         //private System.Windows.Forms.Panel addContactsPanel;
-        private System.Windows.Forms.TextBox textBox1;
+        //private System.Windows.Forms.TextBox textBox1;
         //private System.Windows.Forms.Label iPLabel;
         //private System.Windows.Forms.Label nameLabel;
         //private System.Windows.Forms.Label addContactsLabel;
         private System.Windows.Forms.ToolTip toolTipHandler;
         private System.Windows.Forms.TextBox contactIPTextbox;
         private System.Windows.Forms.TextBox contactNameTextbox;
+        private System.Windows.Forms.Button contactAddFinishButton;
+        private System.Windows.Forms.Panel messageParentPanel;
+        private System.Windows.Forms.Panel messagingPanel;
+        private System.Windows.Forms.TextBox messageTextBox;
+        private System.Windows.Forms.Button messageSendButton;
+        private System.Windows.Forms.Panel messageDisplayPanel;
         //private System.Windows.Forms.Button contactAddButton;
         //private System.Windows.Forms.Button ContactAddButton;
     }

@@ -5,7 +5,6 @@ using System.Net;
 using System.Threading;
 using System.Net.Sockets;
 
-using System.Diagnostics; //temporarily here for stopwatch
 
 namespace MessageApp
 {
@@ -21,7 +20,6 @@ namespace MessageApp
 
         private Action<int> controllerSendErrorReport; //callback method to inform controller of a send error
 
-        private Stopwatch stopwatch = new Stopwatch(); //temporary
 
         public ClientComp(string targetIP)
         {
@@ -53,7 +51,6 @@ namespace MessageApp
             {
                 Console.WriteLine("Send message:");
                 String message = Console.ReadLine(); //pauses execution /of this thread/ while waiting for input
-                stopwatch.Start(); //temporary
                 sendSocket = new Socket(IPAddress.Parse(targetIP).AddressFamily, SocketType.Stream, ProtocolType.Tcp); //has to be reinstantiated for reasons
                 try
                 {
@@ -118,18 +115,9 @@ namespace MessageApp
 
             //Console.WriteLine("signature: " + System.Convert.ToBase64String(signatureBytes));
 
-            //sendSocket = new Socket(IPAddress.Parse(targetIP).AddressFamily, SocketType.Stream, ProtocolType.Tcp); //has to be reinstantiated for reasons
             try
             {
-                //sendSocket.Connect(targetEndPoint); // tries to connect to another client
                 sendSocket.Send(transmissionBytes); //sends message synchronously
-
-                int confirmationBytes = sendSocket.Receive(new byte[1024]); //don't care what is received, just that something is
-                if(confirmationBytes == 0)
-                {
-                    controllerSendErrorReport(1); //1 = send error
-                }
-                //sendSocket.Close();
             }
             catch (SocketException e)
             {
@@ -141,14 +129,20 @@ namespace MessageApp
                 }
                 else
                 {
-                    //Console.WriteLine("Socket error code: " + e.ErrorCode);
-                    //Console.WriteLine(e.Message);
-                    controllerSendErrorReport(1);
+                    controllerSendErrorReport(1); //unspecified transmission error
                 }
             }
-            stopwatch.Stop();
-            Console.WriteLine($"Time Elapsed: {stopwatch.ElapsedMilliseconds}");
-            stopwatch.Reset();
+            try
+            {
+                sendSocket.ReceiveTimeout = 2000; //waits up to two seconds for confirmation
+                int confirmationBytes = sendSocket.Receive(new byte[1024]); //don't care what is received, just that something is
+
+            }
+            catch (Exception) //server did not return confirmation
+            {
+
+                controllerSendErrorReport(1); //unspecified transmission error
+            }
         }
 
         public void setSendErrorCallBack(Action<int> newObj)
