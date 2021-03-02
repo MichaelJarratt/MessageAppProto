@@ -48,6 +48,7 @@ namespace MessageAppGUI
             serverComp = new ServerComp();
             serverComp.setMessageCallback(messageReceivedCallBack);
             serverComp.setReceiveErrorCallback(errorCallback);
+            serverComp.startConnectionListenLoop();
         }
         //logic to instantiate client and give it the needed callbacks
         private void setUpClient(String targetIP)
