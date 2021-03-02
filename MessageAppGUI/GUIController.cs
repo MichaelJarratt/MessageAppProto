@@ -41,6 +41,11 @@ namespace MessageAppGUI
             Contact contact = contacts.ElementAt<Contact>(contactID-1); //ID is the same as position
             string contactIP = contact.getIPString(); //extract IP (encrypted in Contact)
         }
+        //logic to instantiate server and give it the needed callbacks
+        private void setUpServer()
+        {
+            serverComp = new ServerComp();
+        }
         private void setUpClient()
         {
 
@@ -48,6 +53,15 @@ namespace MessageAppGUI
         public void sendMessage(string message)
         {
             //clientComp.sendMessage(message); //needs to be implemented
+        }
+
+        //
+        //callbacks
+        //
+        //callback when server receives a message
+        public void messageReceivedCallBack(string message)
+        {
+
         }
 
         private GUIController()
@@ -59,6 +73,7 @@ namespace MessageAppGUI
             Application.Run(messageAppForm);
 
             //logic to start server and give it callbacks
+            setUpServer();
         }
         [STAThread]
         static void Main()
