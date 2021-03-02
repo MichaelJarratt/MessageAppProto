@@ -59,21 +59,22 @@ namespace MessageApp
             Console.WriteLine($"Received message: {message}");
         }
 
-        public void messageReceiveErrorCallbackHandler(int code)
+        public void messageReceiveErrorCallbackHandler(TransmissionErrorCode errorCode)
         {
-            Console.WriteLine($"Error receiving message - code {code}");
+            Console.WriteLine($"Error receiving message - code {errorCode.ToString()}");
         }
 
-        public void messageSendErrorCallbackHandler(int code)
+        public void messageSendErrorCallbackHandler(TransmissionErrorCode errorCode)
         {
-            if(code == 1)
-            {
-                Console.WriteLine("Error sending message");
-            }
-            else if (code == 2)
+            if (errorCode == TransmissionErrorCode.CliNoEndPointConnection)
             {
                 Console.WriteLine("Could not connect to target");
             }
+            else 
+            {
+                Console.WriteLine("Error sending message");
+            }
+            
         }
 
         //entry point

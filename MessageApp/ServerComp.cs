@@ -18,7 +18,7 @@ namespace MessageApp
         Action<String> controllerReturn; // Action can hold a reference to a method, this references the call back handler on MessageApp that prints the received message
         //Action<String> is a void return method that takes one string. Action<String,String> takes two
         //Func<String,String> is a String return method that takes one string. Func<String,String,String> takes two strings.
-        Action<int> controllerReceiveErrorReport; //used to inform controller of errors receiving transmissions
+        Action<TransmissionErrorCode> controllerReceiveErrorReport; //used to inform controller of errors receiving transmissions
 
         public ServerComp()
         {
@@ -119,27 +119,20 @@ namespace MessageApp
                     {
                         completeReceive(bufferState); //pass everything off to complete receive for paring and validation
                     }
-                    catch (Exception e)
+                    catch (Exception)
                     {
-                        if(String.Equals(e.Message, "Could not validate senders signature."))
-                        {
-                            reportReceiveError(3); //invalid signature
-                        }
-                        else
-                        {
-                            reportReceiveError(2); //errors decrypting and validating
-                        }
+                        reportReceiveError(TransmissionErrorCode.ServDecOrValError); //errors decrypting or validating
                     }
                 }
                 else if (bufferState.totalLength != bufferState.totalBytesReceived) //transmission error (total length too short)
                 {
-                    reportReceiveError(1); //total length error
+                    reportReceiveError(TransmissionErrorCode.ServTotalLengthError); //total length error
                 }
             }
             else //if no bytes were received, then a transmission error probably ocurred (total length too long)
             {
                 //arrive here if no more bytes were received
-                reportReceiveError(1); //total length error
+                reportReceiveError(TransmissionErrorCode.ServTotalLengthError); //total length error
             }
         }
 
@@ -167,16 +160,16 @@ namespace MessageApp
             }
             else
             {
-                throw new Exception("Could not validate senders signature.");
+                reportReceiveError(TransmissionErrorCode.ServValidationFail); //report signature failed to validate
             }
             
         }
 
         //calls callback method of controller to inform it that some error occured 
-        private void reportReceiveError(int code)
+        private void reportReceiveError(TransmissionErrorCode errorCode)
         {
             //Console.WriteLine($"receive error - code {code}");
-            controllerReceiveErrorReport(code);
+            controllerReceiveErrorReport(errorCode);
         }
 
         // synchronously accepts the public key of the client
@@ -205,7 +198,7 @@ namespace MessageApp
         {
             controllerReturn = newObj;
         }
-        public void setReceiveErrorCallback(Action<int> newObj)
+        public void setReceiveErrorCallback(Action<TransmissionErrorCode> newObj)
         {
             controllerReceiveErrorReport = newObj;
         }

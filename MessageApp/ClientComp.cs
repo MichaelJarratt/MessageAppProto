@@ -16,7 +16,7 @@ namespace MessageApp
 
         private string receivedPublicKeyString;
 
-        private Action<int> controllerSendErrorReport; //callback method to inform controller of a send error
+        private Action<TransmissionErrorCode> controllerSendErrorReport; //callback method to inform controller of a send error
 
 
         public ClientComp(string targetIP)
@@ -54,13 +54,11 @@ namespace MessageApp
             {
                 if (e.ErrorCode == 10060) //times out, AKA no target to connect to
                 {
-                    //inform controller
-                    Console.WriteLine("Could not connect to endpoint");
+                    controllerSendErrorReport(TransmissionErrorCode.CliNoEndPointConnection);
                 }
                 else //some other kind of uncaught exception (not from transmit though, that catches its own errors)
                 {
-                    //inform controller
-                    Console.WriteLine("something went wrong sending");
+                    controllerSendErrorReport(TransmissionErrorCode.CliKeyExchangeFail);
                 }
             }
 
@@ -122,11 +120,11 @@ namespace MessageApp
                 if (e.SocketErrorCode == SocketError.TimedOut)
                 {
                     //Console.WriteLine("Could not connect to target");
-                    controllerSendErrorReport(2); //could not connect to target
+                    controllerSendErrorReport(TransmissionErrorCode.CliConnectionLost); //could not connect to target
                 }
                 else
                 {
-                    controllerSendErrorReport(1); //unspecified transmission error
+                    controllerSendErrorReport(TransmissionErrorCode.CliTransmissionError); //unspecified transmission error
                 }
             }
             try
@@ -138,11 +136,11 @@ namespace MessageApp
             catch (Exception) //server did not return confirmation
             {
 
-                controllerSendErrorReport(1); //unspecified transmission error
+                controllerSendErrorReport(TransmissionErrorCode.CliNoReceiveConfirmaton);
             }
         }
 
-        public void setSendErrorCallBack(Action<int> newObj)
+        public void setSendErrorCallBack(Action<TransmissionErrorCode> newObj)
         {
             controllerSendErrorReport = newObj;
         }

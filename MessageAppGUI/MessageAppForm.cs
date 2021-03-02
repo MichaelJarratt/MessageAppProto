@@ -44,9 +44,14 @@ namespace MessageAppGUI
         //displays the message history of a contact
         public void loadContact()
         {
-
+            //logic to display messages
         }
 
+        //creates a popup box containg the specified message
+        public void createPopUp(String message)
+        {
+            MessageBox.Show(message, "Warning:"); //"Warning" caption
+        }
         //!form controls (called by controller) //
         //
         //
@@ -67,7 +72,7 @@ namespace MessageAppGUI
         }
         private void toggleHideContactsPanel()
         {
-            if (addContactPanelHidden==false)
+            if (addContactPanelHidden == false)
             {
                 hideAddContactsPanel();
             }
@@ -105,12 +110,12 @@ namespace MessageAppGUI
             //manages tool tips, this reference is needed for some reason
         }
 
-        //toggles visbility of panel
+        //toggles visbility of add contacts panel
         private void contactAddButton_Click(object sender, EventArgs e)
         {
-            toggleHideContactsPanel(); 
+            toggleHideContactsPanel();
         }
-
+        //button that enters data to create contact
         private void contactAddFinishButton_Click(object sender, EventArgs e)
         {
             createNewContact();
@@ -123,6 +128,11 @@ namespace MessageAppGUI
             int contactID = contact.ID; //get iD from control
             controller.loadMessages(contactID); //sends ID to controller so it can load message history and create ClientComponent
             Console.WriteLine($"contact clicked: ID {contactID}");
+        }
+        //handler for send message button being pressed
+        public void sendMessageButton_Click(object sender, EventArgs e)
+        {
+            sendmessage();
         }
     }
 }

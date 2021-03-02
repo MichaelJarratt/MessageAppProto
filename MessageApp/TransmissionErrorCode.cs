@@ -9,13 +9,13 @@ namespace MessageApp
         //ClientComp errors
         CliNoEndPointConnection,    //could not connect to target during sendMessage
         CliKeyExchangeFail,         //caught exception during either key exchange method
-        CliConnectionList,          //no connection when transmitting bytes
+        CliConnectionLost,          //no connection when transmitting bytes
         CliTransmissionError,       //unspecified exeption caught during transmission
         CliNoReceiveConfirmaton,    //did not get confirmation of successful receive from server
 
         //ServerComp errors
         ServTotalLengthError,       //the total length attribute of the transmission was incorrect
         ServDecOrValError,          //exception when trying to decrypt message or validate signature
-        ServeValidationFail,        //signature failed to validate
+        ServValidationFail,        //signature failed to validate
     } 
 }
