@@ -19,9 +19,11 @@ namespace MessageApp
 
         public static ManualResetEvent blockMain = new ManualResetEvent(false); //used to block the main thread from executing while waiting for connections
 
+        private ClientComp clientComp;
+
         public void MainLoop()
         {
-            ClientComp clientComp = new ClientComp(targetIP.ToString());
+            clientComp = new ClientComp(targetIP.ToString());
             ServerComp serverComp = new ServerComp();
             serverComp.setMessageCallback(getMessageCallbackHandler);
             serverComp.setReceiveErrorCallback(messageReceiveErrorCallbackHandler);
@@ -33,8 +35,22 @@ namespace MessageApp
             Console.WriteLine($"Sending to IP {targetIP}");
 
             serverComp.startConnectionListenLoop();
-            clientComp.startListenToConsoleLoop();
+            //clientComp.startListenToConsoleLoop();
 
+            Thread listenToConsoleLoopThread = new Thread(listenToConsoleLoop); //done in thread to not block execution of main thread
+            listenToConsoleLoopThread.Start();
+
+        }
+        //as it says on the tin, constantly listens to the console, when the user enters a message it will be sent
+        //to the communication target
+        private void listenToConsoleLoop()
+        {
+            while (true)
+            {
+                Console.WriteLine("Send message:");
+                String message = Console.ReadLine(); //pauses execution of this thread while waiting for input
+                clientComp.sendMessage(message);
+            }
         }
 
         //this method is called back by ServerComp when a message is received, it takes the received message as a parameter

@@ -36,35 +36,34 @@ namespace MessageApp
         private void init()
         {
             targetEndPoint = new IPEndPoint(IPAddress.Parse(targetIP), targetPort); //ip/port combo to send messages to
-
-            //sendSocket = new Socket(IPAddress.Parse(targetIP).AddressFamily, SocketType.Stream, ProtocolType.Tcp); //instantiate socket
-            //sendSocket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.DontLinger, true);
         }
 
-        // THREAD //
-        //pauses execution while listening for input, then establishes connection with server and sends message
-        private void listenToConsoleLoop()
+        //takes message as input, establishes connection to target and exchanged keys, then passes control over to transmit
+        //to create and send the transmission
+        public void sendMessage(string message)
         {
-            while (true)
+            sendSocket = new Socket(IPAddress.Parse(targetIP).AddressFamily, SocketType.Stream, ProtocolType.Tcp); //create socket to handle sending
+            try
             {
-                Console.WriteLine("Send message:");
-                String message = Console.ReadLine(); //pauses execution /of this thread/ while waiting for input
-                sendSocket = new Socket(IPAddress.Parse(targetIP).AddressFamily, SocketType.Stream, ProtocolType.Tcp); //has to be reinstantiated for reasons
-                try
+                sendSocket.Connect(targetEndPoint);
+                sendKey(sendSocket);
+                receiveKey();
+                transmit(message); //all synchronous and block while being done, the key exchange must be done first
+            }
+            catch(SocketException e)
+            {
+                if (e.ErrorCode == 10060) //times out, AKA no target to connect to
                 {
-                    sendSocket.Connect(targetEndPoint);
-
-
-                    sendKey(sendSocket);
-                    receiveKey();
-                    send(message); //all synchronous and block while being done, the key exchange must be done first
-                }
-                catch(SocketException e)
-                {
+                    //inform controller
                     Console.WriteLine("Could not connect to endpoint");
                 }
-                sendSocket.Close();
+                else //some other kind of uncaught exception (not from transmit though, that catches its own errors)
+                {
+                    //inform controller
+                    Console.WriteLine("something went wrong sending");
+                }
             }
+
         }
 
         //get key from CryptoUtility and send it to paired application
@@ -87,7 +86,7 @@ namespace MessageApp
         }
 
         //sends provided message to server
-        private void send(string message)
+        private void transmit(string message)
         {
             Byte[] signatureBytes = CryptoUtility.signMessage(message); //creates signature for message
             Byte[] messageBytes = Encoding.UTF8.GetBytes(CryptoUtility.encryptData(message,receivedPublicKeyString)); //creates byte array for encrypted message
@@ -100,7 +99,7 @@ namespace MessageApp
             //temporary - testing what happens when corruption occurs
             //totalLengthBytes = lengthIntToBytes(1500);
             //signatureLengthBytes = lengthIntToBytes(260); 
-            messageLengthBytes = lengthIntToBytes(2000);
+            //messageLengthBytes = lengthIntToBytes(2000);
 
 
             //stick lengths, signature and message together
@@ -134,7 +133,7 @@ namespace MessageApp
             {
                 sendSocket.ReceiveTimeout = 2000; //waits up to two seconds for confirmation
                 int confirmationBytes = sendSocket.Receive(new byte[1024]); //don't care what is received, just that something is
-
+                
             }
             catch (Exception) //server did not return confirmation
             {
@@ -153,13 +152,6 @@ namespace MessageApp
         {
             short shortLength = (short) length; //typecast to short (anything greater than 65,536 will either throw exception or loose precision
             return BitConverter.GetBytes(shortLength);
-        }
-
-        //offers way to begin the main loop
-        public void startListenToConsoleLoop()
-        {
-            Thread listenToConsoleLoopThread = new Thread(listenToConsoleLoop);
-            listenToConsoleLoopThread.Start();
         }
     }
 }
