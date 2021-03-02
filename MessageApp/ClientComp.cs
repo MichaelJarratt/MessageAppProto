@@ -5,14 +5,12 @@ using System.Net;
 using System.Threading;
 using System.Net.Sockets;
 
-
 namespace MessageApp
 {
-    class ClientComp
+    public class ClientComp
     {
         private int targetPort;
         private string targetIP;
-
         private Socket sendSocket; //socket creating outbound connections
         IPEndPoint targetEndPoint; //ip/port combo to send messages to
 

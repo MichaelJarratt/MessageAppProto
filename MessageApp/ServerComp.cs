@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace MessageApp
 {
-    class ServerComp
+    public class ServerComp
     {
         private int listenPort; //port the socket will listen to
 

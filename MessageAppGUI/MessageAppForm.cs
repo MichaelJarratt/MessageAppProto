@@ -48,7 +48,9 @@ namespace MessageAppGUI
         }
 
         //!form controls (called by controller) //
-
+        //
+        //
+        //
         //Form controls (local)//
         private void hideAddContactsPanel()
         {
@@ -81,8 +83,22 @@ namespace MessageAppGUI
             string contactIP = contactIPTextbox.Text;
             controller.addContact(contactName, contactIP); //gives information to controller
         }
+        private void showMessagePanel()
+        {
+            hideAddContactsPanel(); //if its on, hide the add contacts panel
+            messageParentPanel.Show();
+        }
+        //just passes what's in messageTextBox to the controller and lets it do the validation
+        private void sendmessage()
+        {
+            string message = messageTextBox.Text;
+            messageTextBox.Text = String.Empty;
+            controller.sendMessage(message);
+        }
         //!form controls (local)//
-
+        //
+        //
+        //
         //form events//
         private void toolTip1_Popup(object sender, PopupEventArgs e)
         {
@@ -102,9 +118,10 @@ namespace MessageAppGUI
         //handles when a ContactControl is clicked, the controller will load the message history
         public void contactPanelClicked(object sender, EventArgs e)
         {
+            showMessagePanel();
             ContactControl contact = (ContactControl)sender; //typecast sender
             int contactID = contact.ID; //get iD from control
-            //send ID to controller
+            controller.loadMessages(contactID); //sends ID to controller so it can load message history and create ClientComponent
             Console.WriteLine($"contact clicked: ID {contactID}");
         }
     }

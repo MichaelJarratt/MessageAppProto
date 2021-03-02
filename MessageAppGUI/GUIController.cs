@@ -5,6 +5,8 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Security.Cryptography;
+using System.Linq;
+using MessageApp;
 
 namespace MessageAppGUI
 {
@@ -12,6 +14,8 @@ namespace MessageAppGUI
     {
         private MessageAppForm messageAppForm;
         private List<Contact> contacts = new List<Contact>();
+        private ClientComp clientComp;
+        private ServerComp serverComp;
 
         //creates and stores a new contact
         public void addContact(string contactName, string IP)
@@ -28,9 +32,22 @@ namespace MessageAppGUI
             messageAppForm.displayContacts(contacts);
         }
 
-        public void loadMessages()
+        //loads messages exchanged with <contactID> and creates clientComponent with their IP address as the target
+        public void loadMessages(int contactID)
         {
             //logic for loading messages
+            //Contact contact = contacts.Select<Contact>(x => x.ID == contactID) //use lambda to get correct record
+            //Contact contact = contacts.Select(contact => contact.ID == contactID).First<Contact>();
+            Contact contact = contacts.ElementAt<Contact>(contactID-1); //ID is the same as position
+            string contactIP = contact.getIPString(); //extract IP (encrypted in Contact)
+        }
+        private void setUpClient()
+        {
+
+        }
+        public void sendMessage(string message)
+        {
+            //clientComp.sendMessage(message); //needs to be implemented
         }
 
         private GUIController()
@@ -40,6 +57,8 @@ namespace MessageAppGUI
             Application.SetCompatibleTextRenderingDefault(false);
             messageAppForm = new MessageAppForm(this); //controller passes itself as reference to the GUI
             Application.Run(messageAppForm);
+
+            //logic to start server and give it callbacks
         }
         [STAThread]
         static void Main()

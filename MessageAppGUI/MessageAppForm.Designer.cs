@@ -42,10 +42,10 @@
             this.addContactsLabel = new System.Windows.Forms.Label();
             this.toolTipHandler = new System.Windows.Forms.ToolTip(this.components);
             this.messageParentPanel = new System.Windows.Forms.Panel();
+            this.messageDisplayPanel = new System.Windows.Forms.Panel();
             this.messagingPanel = new System.Windows.Forms.Panel();
             this.messageSendButton = new System.Windows.Forms.Button();
             this.messageTextBox = new System.Windows.Forms.TextBox();
-            this.messageDisplayPanel = new System.Windows.Forms.Panel();
             ((System.ComponentModel.ISupportInitialize)(this.bindingSource1)).BeginInit();
             this.addContactsPanel.SuspendLayout();
             this.messageParentPanel.SuspendLayout();
@@ -176,6 +176,16 @@
             this.messageParentPanel.Size = new System.Drawing.Size(868, 553);
             this.messageParentPanel.TabIndex = 0;
             // 
+            // messageDisplayPanel
+            // 
+            this.messageDisplayPanel.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.messageDisplayPanel.AutoScroll = true;
+            this.messageDisplayPanel.Location = new System.Drawing.Point(2, 12);
+            this.messageDisplayPanel.Name = "messageDisplayPanel";
+            this.messageDisplayPanel.Size = new System.Drawing.Size(866, 417);
+            this.messageDisplayPanel.TabIndex = 1;
+            // 
             // messagingPanel
             // 
             this.messagingPanel.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
@@ -191,11 +201,12 @@
             // 
             // messageSendButton
             // 
-            this.messageSendButton.Location = new System.Drawing.Point(752, 17);
+            this.messageSendButton.Font = new System.Drawing.Font("Segoe UI", 14F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.messageSendButton.Location = new System.Drawing.Point(737, 33);
             this.messageSendButton.Name = "messageSendButton";
             this.messageSendButton.Size = new System.Drawing.Size(75, 61);
             this.messageSendButton.TabIndex = 1;
-            this.messageSendButton.Text = "button1";
+            this.messageSendButton.Text = "Send";
             this.messageSendButton.UseVisualStyleBackColor = true;
             // 
             // messageTextBox
@@ -205,16 +216,6 @@
             this.messageTextBox.Name = "messageTextBox";
             this.messageTextBox.Size = new System.Drawing.Size(625, 83);
             this.messageTextBox.TabIndex = 0;
-            // 
-            // messageDisplayPanel
-            // 
-            this.messageDisplayPanel.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.messageDisplayPanel.AutoScroll = true;
-            this.messageDisplayPanel.Location = new System.Drawing.Point(2, 12);
-            this.messageDisplayPanel.Name = "messageDisplayPanel";
-            this.messageDisplayPanel.Size = new System.Drawing.Size(866, 417);
-            this.messageDisplayPanel.TabIndex = 1;
             // 
             // MessageAppForm
             // 
