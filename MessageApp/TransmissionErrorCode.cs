@@ -17,5 +17,5 @@ namespace MessageApp
         ServTotalLengthError,       //the total length attribute of the transmission was incorrect
         ServDecOrValError,          //exception when trying to decrypt message or validate signature
         ServValidationFail,        //signature failed to validate
-    } 
+    }
 }

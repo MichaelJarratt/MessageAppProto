@@ -113,10 +113,12 @@ namespace MessageAppGUI
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             messageAppForm = new MessageAppForm(this); //controller passes itself as reference to the GUI
-            Application.Run(messageAppForm);
+
+            setUpServer();
+            Application.Run(messageAppForm); //turs out anything after this does not get executed
 
             //logic to start server and give it callbacks
-            setUpServer();
+            //setUpServer();
         }
         [STAThread]
         static void Main()
@@ -153,7 +155,7 @@ namespace MessageAppGUI
             //decrypt bytes
             byte[] decryptedBytes = ProtectedData.Unprotect(ipBytes, additionalEntropy, DataProtectionScope.LocalMachine);
             string ip = Encoding.UTF8.GetString(decryptedBytes); //convert to string to return
-            ipBytes = protect(ipBytes); //encrypt bytes again
+            //ipBytes = protect(ipBytes); //encrypt bytes again
             return ip;
         }
         //uses the ProtectedData API to encrypt provided byte array

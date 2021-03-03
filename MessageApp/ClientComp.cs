@@ -43,6 +43,7 @@ namespace MessageApp
         public void sendMessage(string message)
         {
             sendSocket = new Socket(IPAddress.Parse(targetIP).AddressFamily, SocketType.Stream, ProtocolType.Tcp); //create socket to handle sending
+            sendSocket.SendTimeout = 5000; //try for 5 seconds to get a connection
             try
             {
                 sendSocket.Connect(targetEndPoint);
