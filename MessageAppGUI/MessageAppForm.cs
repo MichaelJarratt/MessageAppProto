@@ -97,8 +97,11 @@ namespace MessageAppGUI
         private void sendmessage()
         {
             string message = messageTextBox.Text;
-            messageTextBox.Text = String.Empty;
-            controller.sendMessage(message);
+            if (message.Length > 0) //if user actually typed something
+            {
+                messageTextBox.Text = String.Empty;
+                controller.sendMessage(message);
+            }
         }
         //!form controls (local)//
         //

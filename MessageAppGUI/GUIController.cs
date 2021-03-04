@@ -17,6 +17,10 @@ namespace MessageAppGUI
         private ClientComp clientComp;
         private ServerComp serverComp;
 
+        private Contact currentSubject; //contact who is the current focus (when a message is sent, it goes to them)
+
+        private const int MAX_MESSAGE_LENGTH = 501; //maximum message length that can be encrypted with the chosen key length
+
         //creates and stores a new contact
         public void addContact(string contactName, string IP)
         {
@@ -58,7 +62,14 @@ namespace MessageAppGUI
         }
         public void sendMessage(string message)
         {
-            clientComp.sendMessage(message); //tells client component to send the message
+            if (message.Length < MAX_MESSAGE_LENGTH)
+            {
+                clientComp.sendMessage(message); //tells client component to send the message
+            }
+            else
+            {
+                messageAppForm.createPopUp($"Too long, maximum allowed message length is {MAX_MESSAGE_LENGTH} characters");
+            }
         }
 
         //
