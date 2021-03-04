@@ -4,6 +4,7 @@ using System.Text;
 using System.Net;
 using System.Threading;
 using System.Net.Sockets;
+using MessageAppGUI;
 
 namespace MessageApp
 {
@@ -17,7 +18,8 @@ namespace MessageApp
         private string receivedPublicKeyString;
 
         private Action<TransmissionErrorCode> controllerSendErrorReport; //callback method to inform controller of a send error
-
+        private Action<Message> controllerSendConfirmation; //calling this method confirms that the message was sent succesfully
+        private Message currentMessage; //reference to currently used Message object
 
         public ClientComp(string targetIP)
         {
@@ -38,9 +40,16 @@ namespace MessageApp
             targetEndPoint = new IPEndPoint(IPAddress.Parse(targetIP), targetPort); //ip/port combo to send messages to
         }
 
+        // takes message object, stores refeence and has the message sent by sendMessage(string)
+        public void sendMessage(Message message)
+        {
+            currentMessage = message; //stores reference
+            sendMessage(message.message); //extracts message text and sends it
+        }
+
         //takes message as input, establishes connection to target and exchanged keys, then passes control over to transmit
         //to create and send the transmission
-        public void sendMessage(string message)
+        public void sendMessage(string message) //still public so that console version does not break
         {
             sendSocket = new Socket(IPAddress.Parse(targetIP).AddressFamily, SocketType.Stream, ProtocolType.Tcp); //create socket to handle sending
             sendSocket.SendTimeout = 5000; //try for 5 seconds to get a connection
@@ -128,11 +137,13 @@ namespace MessageApp
                     controllerSendErrorReport(TransmissionErrorCode.CliTransmissionError); //unspecified transmission error
                 }
             }
+            //bytes have been sent, need confirmation they've been succesfully received and read
             try
             {
                 sendSocket.ReceiveTimeout = 2000; //waits up to two seconds for confirmation
                 int confirmationBytes = sendSocket.Receive(new byte[1024]); //don't care what is received, just that something is
-                
+
+                confirmSendSuccess(); //reports successful sending to controller
             }
             catch (Exception) //server did not return confirmation
             {
@@ -141,9 +152,24 @@ namespace MessageApp
             }
         }
 
+        //returns currentMessage to controller and confirms that it was sent
+        private void confirmSendSuccess()
+        {
+            if (controllerSendConfirmation != null)
+            {
+                controllerSendConfirmation(currentMessage); //controller uses meta data to store message
+            }
+        }
+
+        //callback to be used to report errors
         public void setSendErrorCallBack(Action<TransmissionErrorCode> newObj)
         {
             controllerSendErrorReport = newObj;
+        }
+        //callback to be used to confirm message was sent succesfully
+        public void setSendConfirmationCallback(Action<Message> newObj)
+        {
+            controllerSendConfirmation = newObj;
         }
 
         //takes int32 number, typecasts to int16, converts it to Byte[] with two elements and returns it

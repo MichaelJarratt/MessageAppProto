@@ -52,6 +52,12 @@ namespace MessageAppGUI
         {
             MessageBox.Show(message, "Warning:"); //"Warning" caption
         }
+
+        //confirmation that the message has been sent, clear the message from the text area
+        public void messageSentConfirmed()
+        {
+            messageTextBox.Text = String.Empty;
+        }
         //!form controls (called by controller) //
         //
         //
@@ -94,12 +100,12 @@ namespace MessageAppGUI
             messageParentPanel.Show();
         }
         //just passes what's in messageTextBox to the controller and lets it do the validation
+        //textbox is cleared by messageSentConfirmed (controller called form controls)
         private void sendmessage()
         {
             string message = messageTextBox.Text;
             if (message.Length > 0) //if user actually typed something
             {
-                messageTextBox.Text = String.Empty;
                 controller.sendMessage(message);
             }
         }

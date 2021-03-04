@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MessageAppGUI;
+using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
@@ -15,7 +16,7 @@ namespace MessageApp
         private Socket connectionListener; //socker that listens for incoming connections
         private ManualResetEvent blockConnectionListenLoop; //blocks loop listening to connections until a connection is received
         
-        Action<String> controllerReturn; // Action can hold a reference to a method, this references the call back handler on MessageApp that prints the received message
+        Action<Message> controllerReturn; // Action can hold a reference to a method, this references the call back handler on MessageApp that prints the received message
         //Action<String> is a void return method that takes one string. Action<String,String> takes two
         //Func<String,String> is a String return method that takes one string. Func<String,String,String> takes two strings.
         Action<TransmissionErrorCode> controllerReceiveErrorReport; //used to inform controller of errors receiving transmissions
@@ -148,14 +149,17 @@ namespace MessageApp
             Byte[] messageBytes = new ArraySegment<Byte>(bufferState.bytes, 6 + bufferState.signatureLength, bufferState.messageLength).ToArray();
 
             //decrypt message with private key and get its string
-            string message = CryptoUtility.decryptData(Encoding.UTF8.GetString(messageBytes), CryptoUtility.getPrivateKey());
+            string messageString = CryptoUtility.decryptData(Encoding.UTF8.GetString(messageBytes), CryptoUtility.getPrivateKey());
 
             //validate signature (inspect validateSignature to see how)
-            bool validSignature = CryptoUtility.validateSignature(Encoding.UTF8.GetBytes(message), signatureBytes, bufferState.keyString);
+            bool validSignature = CryptoUtility.validateSignature(Encoding.UTF8.GetBytes(messageString), signatureBytes, bufferState.keyString);
 
             if (validSignature)
             {
                 bufferState.socket.Send(Encoding.UTF8.GetBytes("received")); //send confirmation of successful receive
+                string senderIP = ((System.Net.IPEndPoint)bufferState.socket.RemoteEndPoint).Address.ToString(); //pretty dumb, have to cast socket.remoteEndPoint to IPEndPoint to access the Address attribute 
+
+                Message message = new Message(messageString, senderIP); //creates message object with content and IP of the sender
                 controllerReturn(message);
             }
             else
@@ -194,7 +198,7 @@ namespace MessageApp
         }
 
 
-        public void setMessageCallback(Action<String> newObj)
+        public void setMessageCallback(Action<Message> newObj)
         {
             controllerReturn = newObj;
         }

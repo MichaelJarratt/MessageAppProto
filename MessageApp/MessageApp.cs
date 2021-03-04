@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading;
 using System.Security.Cryptography;
 using System.Timers;
+using MessageAppGUI;
 
 namespace MessageApp
 {
@@ -54,9 +55,10 @@ namespace MessageApp
         }
 
         //this method is called back by ServerComp when a message is received, it takes the received message as a parameter
-        public void getMessageCallbackHandler(string message)
+        public void getMessageCallbackHandler(Message message)
         {
-            Console.WriteLine($"Received message: {message}");
+            String messageString = message.message;
+            Console.WriteLine($"Received message: {messageString}");
         }
 
         public void messageReceiveErrorCallbackHandler(TransmissionErrorCode errorCode)

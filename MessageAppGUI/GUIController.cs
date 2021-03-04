@@ -45,12 +45,14 @@ namespace MessageAppGUI
             Contact contact = contacts.ElementAt<Contact>(contactID-1); //ID is the same as position
             string contactIP = contact.getIPString(); //extract IP (encrypted in Contact)
             setUpClient(contactIP); //creates client that will send messages to contactIP
+
+            currentSubject = contact;
         }
         //logic to instantiate server and give it the needed callbacks
         private void setUpServer()
         {
             serverComp = new ServerComp();
-            serverComp.setMessageCallback(messageReceivedCallBack);
+            serverComp.setMessageCallback(messageReceivedCallback);
             serverComp.setReceiveErrorCallback(errorCallback);
             serverComp.startConnectionListenLoop();
         }
@@ -59,11 +61,14 @@ namespace MessageAppGUI
         {
             clientComp = new ClientComp(targetIP); //creates client component with IP of contact
             clientComp.setSendErrorCallBack(errorCallback);
+            clientComp.setSendConfirmationCallback(messageSentCallback); //callback to confirm the message was sent
         }
-        public void sendMessage(string message)
+        //called by sendMessage in MessageAppForm
+        public void sendMessage(string messageString)
         {
-            if (message.Length < MAX_MESSAGE_LENGTH)
+            if (messageString.Length < MAX_MESSAGE_LENGTH)
             {
+                Message message = new Message(messageString, currentSubject.ID);
                 clientComp.sendMessage(message); //tells client component to send the message
             }
             else
@@ -76,9 +81,16 @@ namespace MessageAppGUI
         //callbacks
         //
         //callback when server receives a message
-        public void messageReceivedCallBack(string message)
+        public void messageReceivedCallback(Message message)
         {
-            Console.WriteLine($"message received: \n{message}"); //print to console for now
+            string messageString = message.message;
+            Console.WriteLine($"message received: \n{messageString}"); //print to console for now
+        }
+        //callback for confirming message has been send
+        public void messageSentCallback(Message message)
+        {
+            //logic to store it
+            messageAppForm.messageSentConfirmed();
         }
         //error callback - creates a pop up informing the user that an error of (type) has occured
         public void errorCallback(TransmissionErrorCode errorCode)
