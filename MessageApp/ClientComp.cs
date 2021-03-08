@@ -4,7 +4,6 @@ using System.Text;
 using System.Net;
 using System.Threading;
 using System.Net.Sockets;
-using MessageAppGUI;
 
 namespace MessageApp
 {

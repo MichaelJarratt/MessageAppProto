@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace MessageAppGUI
+namespace MessageApp
 {
     //this class represents a message and its meta data
     public class Message

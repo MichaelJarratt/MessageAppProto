@@ -7,15 +7,17 @@ using System.Windows.Forms;
 using System.Security.Cryptography;
 using System.Linq;
 using MessageApp;
+using Message = MessageApp.Message;
 
 namespace MessageAppGUI
 {
     public class GUIController
     {
-        private MessageAppForm messageAppForm;
+        private MessageAppForm messageAppForm; //view
         private List<Contact> contacts = new List<Contact>();
         private ClientComp clientComp;
         private ServerComp serverComp;
+        private ContactManager contactManager;
 
         private Contact currentSubject; //contact who is the current focus (when a message is sent, it goes to them)
 
@@ -138,6 +140,10 @@ namespace MessageAppGUI
             messageAppForm = new MessageAppForm(this); //controller passes itself as reference to the GUI
 
             setUpServer();
+            contactManager = new ContactManager(); //manages creation and retrieval of contacts, as well as identifying senders of received messages
+
+            //DatabaseInterface db = new DatabaseInterface("testDB");
+
             Application.Run(messageAppForm); //turs out anything after this does not get executed
 
             //logic to start server and give it callbacks

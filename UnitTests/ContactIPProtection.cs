@@ -6,6 +6,10 @@ namespace UnitTests
     [TestClass]
     public class ContactIPProtection
     {
+        const string UNIT_TEST = "Unit Test";
+
+
+        [TestCategory(UNIT_TEST)]
         [TestMethod]
         public void protectThenUnprotect()
         {
@@ -23,6 +27,7 @@ namespace UnitTests
             //}
         }
 
+        [TestCategory(UNIT_TEST)]
         [TestMethod]
         public void protectThenUnprotectTwice()
         {
