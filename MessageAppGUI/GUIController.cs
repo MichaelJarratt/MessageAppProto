@@ -24,40 +24,36 @@ namespace MessageAppGUI
 
         private delegate void MessageAppFormDisplayContactsDelegate(List<Contact> contacts);
 
-        //creates and stores a new contact
+        /// <summary>
+        /// Creates and stored contact with the provided information
+        /// </summary>
+        /// <param name="contactName">Name of contact to add</param>
+        /// <param name="IP">IP address of contact to add</param>
         public void addContact(string contactName, string IP)
         {
-            //storage logic
-            //int ID = contacts.Count + 1; //sets ID for new contact
-            //Contact newContact = new Contact(ID, contactName, IP);
-            //contacts.Add(newContact); //add it to list
             contactManager.addContact(contactName, IP);
             updateDisplayedContacts(); //tell UI to display new contacts
         }
         //tells the UI to update to show contacts (updates when there's new contacts)
         public void updateDisplayedContacts()
         {
-            //MethodInvoker methodDelegate = delegate () { messageAppForm.displayContacts(contactManager.contactsList); };
-            //MethodInvoker methodDelegate = delegate () { messageAppForm.displayContacts(); };
-
-            //delegate void methodDelegate(List<Contact> contacts);
-            //methodDelegate?.Invoke();
-
+            //creates a delegate function which represents the displayContacts message of messageAppForm
             Delegate del = new MessageAppFormDisplayContactsDelegate(messageAppForm.displayContacts);
-            //Control control = new Control();
+            //tells the messageApp to run this on its own thread
             messageAppForm.Invoke(del,contactManager.contactsList);
 
-            //Action<List<Contact>> del = messageAppForm.displayContacts;
-            //del(contactManager.contactsList);
-
-            //messageAppForm.displayContacts(contactManager.contactsList);
+            /* Why this is necessary:
+             * The controller runs in the same thread as the MessageAppForm, this means it is free to alter form elements
+             * However when the server (which runs in its own thread) receives a message from a new contact,
+             * a chain of events results in this method being run, however because it was called from another thread, it 
+             * causes exceptions when it tried to alter stuff in the form (Illegal Thread call or something)
+             */
         }
 
         //loads messages exchanged with <contactID> and creates clientComponent with their IP address as the target
         public void loadMessages(int contactID)
         {
             //logic for loading messages
-            //Contact contact = contacts.ElementAt<Contact>(contactID-1); //ID is the same as position
             Contact contact = contactManager.getContact(contactID); //get specified Contact from contact Manager
             string contactIP = contact.getIPString(); //extract IP (encrypted in Contact)
             setUpClient(contactIP); //creates client that will send messages to contactIP

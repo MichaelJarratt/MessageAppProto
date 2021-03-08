@@ -111,11 +111,10 @@ namespace MessageAppGUI
         //
         //form events//
         
-        //called when controller does Application.Run
+        //called when controller does Application.Run - runs this when all the form stuff is set up and ready to go
         private void MessageAppForm_Load(Object sender, EventArgs e)
         {
-            //Console.WriteLine("messageAppForm started");
-            controller.updateDisplayedContacts();
+            controller.updateDisplayedContacts(); //asks controller to update the visible contacts
         }
         private void toolTip1_Popup(object sender, PopupEventArgs e)
         {
