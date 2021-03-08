@@ -38,14 +38,10 @@ namespace MessageAppGUI
                 newContact.Location = new Point(30, contactControlCount * 110); //moves each successive control down so they don't overlap
                 contactControlCount++;
 
-                contactsPanel.Controls.Add(newContact);
+                contactsPanel.Controls.Add(newContact); 
             }
         }
-        //displays the message history of a contact
-        public void loadContact()
-        {
-            //logic to display messages
-        }
+       
 
         //creates a popup box containg the specified message
         public void createPopUp(String message)
@@ -114,6 +110,13 @@ namespace MessageAppGUI
         //
         //
         //form events//
+        
+        //called when controller does Application.Run
+        private void MessageAppForm_Load(Object sender, EventArgs e)
+        {
+            //Console.WriteLine("messageAppForm started");
+            controller.updateDisplayedContacts();
+        }
         private void toolTip1_Popup(object sender, PopupEventArgs e)
         {
             //manages tool tips, this reference is needed for some reason

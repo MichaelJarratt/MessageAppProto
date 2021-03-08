@@ -1,20 +1,19 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Security.Cryptography;
-using System.Linq;
 using MessageApp;
 using Message = MessageApp.Message;
+using System.Threading;
 
 namespace MessageAppGUI
 {
     public class GUIController
     {
         private MessageAppForm messageAppForm; //view
-        private List<Contact> contacts = new List<Contact>();
+        //private List<Contact> contacts = new List<Contact>();
         private ClientComp clientComp;
         private ServerComp serverComp;
         private ContactManager contactManager;
@@ -23,28 +22,43 @@ namespace MessageAppGUI
 
         private const int MAX_MESSAGE_LENGTH = 501; //maximum message length that can be encrypted with the chosen key length
 
+        private delegate void MessageAppFormDisplayContactsDelegate(List<Contact> contacts);
+
         //creates and stores a new contact
         public void addContact(string contactName, string IP)
         {
             //storage logic
-            int ID = contacts.Count + 1; //sets ID for new contact
-            Contact newContact = new Contact(ID, contactName, IP);
-            contacts.Add(newContact); //add it to list
+            //int ID = contacts.Count + 1; //sets ID for new contact
+            //Contact newContact = new Contact(ID, contactName, IP);
+            //contacts.Add(newContact); //add it to list
+            contactManager.addContact(contactName, IP);
             updateDisplayedContacts(); //tell UI to display new contacts
         }
         //tells the UI to update to show contacts (updates when there's new contacts)
-        private void updateDisplayedContacts()
+        public void updateDisplayedContacts()
         {
-            messageAppForm.displayContacts(contacts);
+            //MethodInvoker methodDelegate = delegate () { messageAppForm.displayContacts(contactManager.contactsList); };
+            //MethodInvoker methodDelegate = delegate () { messageAppForm.displayContacts(); };
+
+            //delegate void methodDelegate(List<Contact> contacts);
+            //methodDelegate?.Invoke();
+
+            Delegate del = new MessageAppFormDisplayContactsDelegate(messageAppForm.displayContacts);
+            //Control control = new Control();
+            messageAppForm.Invoke(del,contactManager.contactsList);
+
+            //Action<List<Contact>> del = messageAppForm.displayContacts;
+            //del(contactManager.contactsList);
+
+            //messageAppForm.displayContacts(contactManager.contactsList);
         }
 
         //loads messages exchanged with <contactID> and creates clientComponent with their IP address as the target
         public void loadMessages(int contactID)
         {
             //logic for loading messages
-            //Contact contact = contacts.Select<Contact>(x => x.ID == contactID) //use lambda to get correct record
-            //Contact contact = contacts.Select(contact => contact.ID == contactID).First<Contact>();
-            Contact contact = contacts.ElementAt<Contact>(contactID-1); //ID is the same as position
+            //Contact contact = contacts.ElementAt<Contact>(contactID-1); //ID is the same as position
+            Contact contact = contactManager.getContact(contactID); //get specified Contact from contact Manager
             string contactIP = contact.getIPString(); //extract IP (encrypted in Contact)
             setUpClient(contactIP); //creates client that will send messages to contactIP
 
@@ -85,7 +99,11 @@ namespace MessageAppGUI
         //callback when server receives a message
         public void messageReceivedCallback(Message message)
         {
+            Contact contact = contactManager.identifySender(message); //uses IP of sender it identify them, creates new contact if they are unknown
+            //updateDisplayedContacts(); //update displayed contacts in case
+            Console.WriteLine($"{contact.contactName} - IP: {contact.getIPString()}");
             string messageString = message.message;
+            
             Console.WriteLine($"message received: \n{messageString}"); //print to console for now
         }
         //callback for confirming message has been send
@@ -93,6 +111,11 @@ namespace MessageAppGUI
         {
             //logic to store it
             messageAppForm.messageSentConfirmed();
+        }
+        //callback for when contact manager has to create a new contact for a previously unknown IP address
+        public void newContactCallback()
+        {
+            updateDisplayedContacts();
         }
         //error callback - creates a pop up informing the user that an error of (type) has occured
         public void errorCallback(TransmissionErrorCode errorCode)
@@ -132,6 +155,8 @@ namespace MessageAppGUI
             messageAppForm.createPopUp(message);
         }
 
+
+
         private GUIController()
         {
             Application.SetHighDpiMode(HighDpiMode.SystemAware);
@@ -139,12 +164,12 @@ namespace MessageAppGUI
             Application.SetCompatibleTextRenderingDefault(false);
             messageAppForm = new MessageAppForm(this); //controller passes itself as reference to the GUI
 
-            setUpServer();
+            setUpServer(); //initialises server and assings needed callback functions
             contactManager = new ContactManager(); //manages creation and retrieval of contacts, as well as identifying senders of received messages
+            contactManager.setNewContactCallback(newContactCallback);
+            //updateDisplayedContacts(); //gets list of exisiting contacts from ContactManager and displays them in view
 
-            //DatabaseInterface db = new DatabaseInterface("testDB");
-
-            Application.Run(messageAppForm); //turs out anything after this does not get executed
+            Application.Run(messageAppForm); //turns out anything after this does not get executed
 
             //logic to start server and give it callbacks
             //setUpServer();

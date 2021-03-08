@@ -7,7 +7,9 @@ using System.Reflection;
 
 namespace MessageAppGUI
 {
-    //this class is responsible for creating the database (if needed) and executing queries on it
+    ///<summary>
+    ///this class is responsible for creating the database (if needed) and executing queries on it
+    ///</summary>
     public class DatabaseInterface
     {
         SQLiteConnection db;

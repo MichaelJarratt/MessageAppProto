@@ -119,7 +119,7 @@ namespace MessageApp
                     {
                         completeReceive(bufferState); //pass everything off to complete receive for paring and validation
                     }
-                    catch (Exception)
+                    catch (Exception e)
                     {
                         reportReceiveError(TransmissionErrorCode.ServDecOrValError); //errors decrypting or validating
                     }
