@@ -22,7 +22,10 @@ namespace MessageAppGUI
 
         private const int MAX_MESSAGE_LENGTH = 501; //maximum message length that can be encrypted with the chosen key length
 
-        private delegate void MessageAppFormDisplayContactsDelegate(List<Contact> contacts);
+        //Delegates - these are for calling methods on the MessageAppForm (call chains started by server) to prevent thread exception
+        private delegate void MAFDisplayContactsDelegate(List<Contact> contacts);
+        private delegate void MAFDisplayMessageDelegate(Message message);
+        private delegate void MAFDisplayMessagesDelegate(List<Message> messags);
 
         /// <summary>
         /// Creates and stored contact with the provided information
@@ -38,7 +41,7 @@ namespace MessageAppGUI
         public void updateDisplayedContacts()
         {
             //creates a delegate function which represents the displayContacts message of messageAppForm
-            Delegate del = new MessageAppFormDisplayContactsDelegate(messageAppForm.displayContacts);
+            Delegate del = new MAFDisplayContactsDelegate(messageAppForm.displayContacts);
             //tells the messageApp to run this on its own thread
             messageAppForm.Invoke(del,contactManager.contactsList);
 
@@ -48,6 +51,18 @@ namespace MessageAppGUI
              * a chain of events results in this method being run, however because it was called from another thread, it 
              * causes exceptions when it tried to alter stuff in the form (Illegal Thread call or something)
              */
+        }
+        //takes a single Message as a parameter and sends to it MessageAppForm to be displayed
+        private void displayMessage(Message message)
+        {
+            Delegate del = new MAFDisplayMessageDelegate(messageAppForm.displayMessage);
+            messageAppForm.Invoke(del, message);
+        }
+        //takes a list of messages as a parameter and sends them to MessageAppForm to be displayed
+        private void displayMessages(List<Message> messages)
+        {
+            Delegate del = new MAFDisplayMessagesDelegate(messageAppForm.displayMessages);
+            messageAppForm.Invoke(del, messages);
         }
 
         //loads messages exchanged with <contactID> and creates clientComponent with their IP address as the target
@@ -59,6 +74,10 @@ namespace MessageAppGUI
             setUpClient(contactIP); //creates client that will send messages to contactIP
 
             currentSubject = contact;
+
+            //temp
+            Message message = new Message("hello there", 1, 0);
+            displayMessage(message);
         }
         //logic to instantiate server and give it the needed callbacks
         private void setUpServer()

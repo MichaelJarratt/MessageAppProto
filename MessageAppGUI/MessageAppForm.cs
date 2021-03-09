@@ -1,10 +1,12 @@
-﻿using System;
+﻿using MessageAppGUI.View;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
+using Message = MessageApp.Message;
 
 namespace MessageAppGUI
 {
@@ -12,6 +14,8 @@ namespace MessageAppGUI
     {
         GUIController controller; //reference to the controller for this UI
         private bool addContactPanelHidden = true; //hidden by default
+
+        int MessageControlCount = 0; //the number of messages currently displayed (used to calculate where to place the next)
 
         public MessageAppForm(GUIController controller)
         {
@@ -39,6 +43,32 @@ namespace MessageAppGUI
                 contactControlCount++;
 
                 contactsPanel.Controls.Add(newContact); 
+            }
+        }
+        /// <summary>
+        /// Takes a single message and adds it to the displayed messages
+        /// </summary>
+        /// <param name="message">Message to be displayed</param>
+        public void displayMessage(Message message)
+        {
+            bool sent = false;
+            if (message.sender == 0) //zero means "local"
+                sent = true; //so therefor sent by this application
+
+            MessageControl messageControl = new MessageControl(message.message,sent);
+            messageDisplayPanel.Controls.Add(messageControl);
+        }
+        /// <summary>
+        /// Takes a list of messages and displays them, clears current messages
+        /// </summary>
+        /// <param name="messages">List of Messages to be displayed</param>
+        public void displayMessages(List<Message> messages)
+        {
+            messageDisplayPanel.Controls.Clear(); //clears messages from panel
+            MessageControlCount = 0; //resets number of displayed messages
+            foreach (Message message in messages)
+            {
+                displayMessage(message);
             }
         }
        
