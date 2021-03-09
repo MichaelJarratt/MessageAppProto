@@ -15,7 +15,7 @@ namespace MessageAppGUI
         GUIController controller; //reference to the controller for this UI
         private bool addContactPanelHidden = true; //hidden by default
 
-        int MessageControlCount = 0; //the number of messages currently displayed (used to calculate where to place the next)
+        int MessageControlHeightOffset = 0; //the height offset of all displayed messages+padding between them (basically the y position to place new MessageControls at)
 
         public MessageAppForm(GUIController controller)
         {
@@ -56,8 +56,13 @@ namespace MessageAppGUI
                 sent = true; //so therefor sent by this application
 
             MessageControl messageControl = new MessageControl(message.message,sent);
+            messageControl.Location = new Point(0,MessageControlHeightOffset); //X will be set by MessageControls Load() method
             messageDisplayPanel.Controls.Add(messageControl);
+
+            //done after message has been initialised, as message adjusts its height to fit the content
+            MessageControlHeightOffset += messageControl.Height + 10; //add height of the new MessageControl + 10 px padding for next message
         }
+
         /// <summary>
         /// Takes a list of messages and displays them, clears current messages
         /// </summary>
@@ -65,7 +70,7 @@ namespace MessageAppGUI
         public void displayMessages(List<Message> messages)
         {
             messageDisplayPanel.Controls.Clear(); //clears messages from panel
-            MessageControlCount = 0; //resets number of displayed messages
+            MessageControlHeightOffset = 0; //resets height offset
             foreach (Message message in messages)
             {
                 displayMessage(message);

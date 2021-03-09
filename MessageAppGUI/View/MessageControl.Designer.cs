@@ -50,6 +50,7 @@
             this.Controls.Add(this.messageTextLabel);
             this.Name = "MessageControl";
             this.Size = new System.Drawing.Size(303, 114);
+            this.Load += new System.EventHandler(this.MessageControl_Load);
             this.ResumeLayout(false);
             this.PerformLayout();
 

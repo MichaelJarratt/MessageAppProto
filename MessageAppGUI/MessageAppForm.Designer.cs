@@ -54,6 +54,8 @@
             // 
             // contactsPanel
             // 
+            this.contactsPanel.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left)));
             this.contactsPanel.AutoScroll = true;
             this.contactsPanel.BackColor = System.Drawing.Color.Silver;
             this.contactsPanel.Location = new System.Drawing.Point(0, 54);
@@ -188,8 +190,7 @@
             // 
             // messagingPanel
             // 
-            this.messagingPanel.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
+            this.messagingPanel.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.messagingPanel.BackColor = System.Drawing.Color.LightGray;
             this.messagingPanel.Controls.Add(this.messageSendButton);

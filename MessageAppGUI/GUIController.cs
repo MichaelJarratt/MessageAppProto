@@ -78,6 +78,14 @@ namespace MessageAppGUI
             //temp
             Message message = new Message("hello there", 1, 0);
             displayMessage(message);
+            message = new Message("GeNeRaL KEnoBi", 0, 1);
+            displayMessage(message);
+            message = new Message("You're a bold one", 0, 1);
+            displayMessage(message);
+            message = new Message("no u", 1, 0);
+            displayMessage(message);
+            message = new Message("E\nE", 0, 1);
+            displayMessage(message);
         }
         //logic to instantiate server and give it the needed callbacks
         private void setUpServer()
