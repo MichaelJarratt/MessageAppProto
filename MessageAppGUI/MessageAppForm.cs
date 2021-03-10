@@ -68,7 +68,7 @@ namespace MessageAppGUI
             messageDisplayPanel.Controls.Add(messageControl);
 
             //done after message has been initialised, as message adjusts its height to fit the content
-            Console.WriteLine($"message height: {messageControl.Height}px");
+            //Console.WriteLine($"message height: {messageControl.Height}px");
             MessageControlHeightOffset += messageControl.Height + 10; //add height of the new MessageControl + 10 px padding for next message
 
             //Console.WriteLine($"panel height after: {messageDisplayPanel.Height}");

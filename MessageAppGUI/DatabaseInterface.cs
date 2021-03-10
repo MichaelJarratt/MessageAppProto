@@ -23,12 +23,7 @@ namespace MessageAppGUI
 
             if (!File.Exists(databaseFile))
             {
-                Console.WriteLine("does not exist");
                 createDB(dbName); //logic to create file and set up tables and rules
-            }
-            else
-            {
-                Console.WriteLine("does exist");
             }
             db = db = new SQLiteConnection($"Data Source={databaseFile};Version=3;"); //creates connection to database
             db.Open(); //opens connection (aka it's ready to use)
