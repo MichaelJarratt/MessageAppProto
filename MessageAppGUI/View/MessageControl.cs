@@ -33,6 +33,7 @@ namespace MessageAppGUI.View
             }
             messageTextLabel.MaximumSize = new Size(400, 0); //0 means no restriction, so the label can be as long as needed, but not exceed the width of the control (which overrides setting max width of control)
             messageTextLabel.Text = messageText;
+            messageTextLabel.TextAlign = ContentAlignment.MiddleLeft;
 
             //this.MaximumSize = new Size(10000, 400); //I just don't want it to stretch too wide
             this.Width = 400;
