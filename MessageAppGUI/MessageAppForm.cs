@@ -71,6 +71,8 @@ namespace MessageAppGUI
             //Console.WriteLine($"message height: {messageControl.Height}px");
             MessageControlHeightOffset += messageControl.Height + 10; //add height of the new MessageControl + 10 px padding for next message
 
+            messageDisplayPanel.AutoScrollPosition = new Point(0, (messageDisplayPanel.Height - MessageControlHeightOffset)*-1); //makes it scroll to the bottom after each message
+
             //Console.WriteLine($"panel height after: {messageDisplayPanel.Height}");
             //Console.WriteLine($"offset after:{MessageControlHeightOffset}");
             //Console.WriteLine(messageDisplayPanel.AutoScrollPosition);
