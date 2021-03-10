@@ -75,17 +75,20 @@ namespace MessageAppGUI
 
             currentSubject = contact;
 
-            //temp
-            Message message = new Message("hello there", 1, 0);
-            displayMessage(message);
-            message = new Message("GeNeRaL KEnoBi", 0, 1);
-            displayMessage(message);
-            message = new Message("You're a bold one", 0, 1);
-            displayMessage(message);
-            message = new Message("no u", 1, 0);
-            displayMessage(message);
-            message = new Message("E\nE", 0, 1);
-            displayMessage(message);
+            List<Message> messageHistory = new List<Message>(); //this will be the list retrieved by the MessageManager
+            displayMessages(messageHistory); //clears previous messages in window and displays all past messages with <contact>
+
+            ////temp
+            //Message message = new Message("hello there", 1, 0);
+            //displayMessage(message);
+            //message = new Message("GeNeRaL KEnoBi", 0, 1);
+            //displayMessage(message);
+            //message = new Message("You're a bold one", 0, 1);
+            //displayMessage(message);
+            //message = new Message("no u", 1, 0);
+            //displayMessage(message);
+            //message = new Message("E\nE", 0, 1);
+            //displayMessage(message);
         }
         //logic to instantiate server and give it the needed callbacks
         private void setUpServer()
@@ -124,6 +127,12 @@ namespace MessageAppGUI
         {
             Contact contact = contactManager.identifySender(message); //uses IP of sender it identify them, creates new contact if they are unknown
             //updateDisplayedContacts(); //update displayed contacts in case
+
+            if (contact.ID == currentSubject.ID) //if the contact who sent the message is the current focus on the messaging window, display the message
+            {
+                displayMessage(message); //only get to this point if received succesfully, so display it
+            }
+
             Console.WriteLine($"{contact.contactName} - IP: {contact.getIPString()}");
             string messageString = message.message;
             
@@ -133,7 +142,8 @@ namespace MessageAppGUI
         public void messageSentCallback(Message message)
         {
             //logic to store it
-            messageAppForm.messageSentConfirmed();
+            messageAppForm.messageSentConfirmed(); //tells form to clear the input box
+            displayMessage(message); //show the message
         }
         //callback for when contact manager has to create a new contact for a previously unknown IP address
         public void newContactCallback()

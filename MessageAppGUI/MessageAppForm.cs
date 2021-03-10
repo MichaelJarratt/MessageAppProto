@@ -52,11 +52,11 @@ namespace MessageAppGUI
         public void displayMessage(Message message)
         {
             bool sent = false;
-            if (message.sender == 0) //zero means "local"
+            if (message.target != 0) //zero means "local"
                 sent = true; //so therefor sent by this application
 
             MessageControl messageControl = new MessageControl(message.message,sent);
-            messageControl.Location = new Point(0,MessageControlHeightOffset); //X will be set by MessageControls Load() method
+            messageControl.Location = new Point(0,MessageControlHeightOffset+ messageDisplayPanel.AutoScrollPosition.Y); //X will be set by MessageControls Load() method
             messageDisplayPanel.Controls.Add(messageControl);
 
             //done after message has been initialised, as message adjusts its height to fit the content
@@ -134,11 +134,18 @@ namespace MessageAppGUI
         //textbox is cleared by messageSentConfirmed (controller called form controls)
         private void sendmessage()
         {
+            Console.WriteLine($"panel height before: {messageDisplayPanel.Height}");
+            Console.WriteLine($"offset before:{MessageControlHeightOffset}");
             string message = messageTextBox.Text;
             if (message.Length > 0) //if user actually typed something
             {
                 controller.sendMessage(message);
             }
+            Console.WriteLine($"panel height after: {messageDisplayPanel.Height}");
+            Console.WriteLine($"offset after:{MessageControlHeightOffset}");
+            Console.WriteLine(messageDisplayPanel.AutoScrollOffset);
+            Console.WriteLine(messageDisplayPanel.AutoScrollPosition);
+            Console.WriteLine(messageDisplayPanel.Width);
         }
         //!form controls (local)//
         //
