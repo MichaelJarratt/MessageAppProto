@@ -12,7 +12,7 @@ namespace MessageAppGUI
     /// </summary>
     class ContactManager
     {
-        private const string DB_Name = "MessageAppDB"; //name of database the application will work with
+        private const string DB_NAME = "MessageAppDB"; //name of database the application will work with
         DatabaseInterface db;
 
         public List<Contact> contactsList { get; } = new List<Contact>();//keeps list of contacts in memory
@@ -21,7 +21,7 @@ namespace MessageAppGUI
 
         public ContactManager()
         {
-            db = new DatabaseInterface(DB_Name);
+            db = new DatabaseInterface(DB_NAME);
             loadContacts(); //loads contacts from database into list
         }
        /// <summary>
@@ -44,7 +44,7 @@ namespace MessageAppGUI
 
         /// <summary>
         /// Takes a message with an IP and returns the associated Contact. If the contact does not exist, it creates a new one
-        /// by the name "unkown"
+        /// by the name "unkown". The supplied Message has it's IP field cleared and its sender ID set.
         /// </summary>
         /// <param name="message">Received message with IPString field</param>
         /// <returns>Contact associated with messages IP</returns>
@@ -59,6 +59,7 @@ namespace MessageAppGUI
             {
                 //Console.WriteLine($"Sender known: {contact.contactName}");
                 message.IPString = null; //unset IP to protect against memory imaging
+                message.sender = contact.ID; //sets ID of message so it can be passes straight to MessageManager for storage
                 return contact; //return it
             }
             else //contact does not exist

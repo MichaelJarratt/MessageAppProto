@@ -26,7 +26,7 @@ namespace MessageApp
             target = 0; //being received by this application
             this.IPString = IPString; //IP of sender, once sender ID is worked out this is cleared to protect the information
         }
-        //constructor used when sender is identified
+        //constructor used when reading from DB
         public Message(string message, int sender, int target)
         {
             this.message = message;

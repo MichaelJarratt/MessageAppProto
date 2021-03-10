@@ -28,14 +28,13 @@ namespace MessageAppGUI.View
             }
             else //if it was received by this instance
             {
-                Anchor = AnchorStyles.Left; //anchor message to the left
+                //Anchor = AnchorStyles.Left; //anchor message to the left
                 BackColor = Color.Gray;
             }
             messageTextLabel.MaximumSize = new Size(400, 0); //0 means no restriction, so the label can be as long as needed, but not exceed the width of the control (which overrides setting max width of control)
             messageTextLabel.Text = messageText;
             messageTextLabel.TextAlign = ContentAlignment.MiddleLeft;
 
-            //this.MaximumSize = new Size(10000, 400); //I just don't want it to stretch too wide
             this.Width = 400;
             this.Height = messageTextLabel.Height + 10; //adjust height to contents
         }

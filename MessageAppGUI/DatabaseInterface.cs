@@ -63,7 +63,7 @@ namespace MessageAppGUI
             db.Open(); //opens connection (aka it's ready to use)
 
             update("CREATE TABLE Users (userID INTEGER PRIMARY KEY, username VARCHAR(50) DEFAULT \"unknown\", IPAddress VARCHAR(20) DEFAULT \"0.0.0.0\")");
-            update("CREATE TABLE Messages (messageID INTEGER PRIMARY KEY, senderID INTEGER REFERENCES Users(userID), Sent BOOLEAN, message VARCHAR(2000))");
+            update("CREATE TABLE Messages (messageID INTEGER PRIMARY KEY, conversationID INTEGER REFERENCES Users(userID), sent BOOLEAN, message VARCHAR(2000))");
         }
     }
 }
