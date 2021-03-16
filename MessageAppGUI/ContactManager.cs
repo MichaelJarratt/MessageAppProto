@@ -79,8 +79,22 @@ namespace MessageAppGUI
         public void addContact(string name, string IPAddress)
         {
             //non-return query on database
-            db.update($"INSERT INTO Users (username, IPAddress) VALUES (\"{name}\",\"{IPAddress}\")"); //ID incremented by DBMS
-            loadContacts(); //reload list from DB
+            //db.update($"INSERT INTO Users (username, IPAddress) VALUES (\"{name}\",\"{IPAddress}\")"); //ID incremented by DBMS
+            //loadContacts(); //reload list from DB
+
+            //create list of byte arrays to be encrypted with the same initialisation vector
+            List<byte[]> data = new List<byte[]>() { Encoding.UTF8.GetBytes(name), Encoding.UTF8.GetBytes(IPAddress) };
+            Tuple<IEnumerable<byte[]>, byte[]> encResult = CryptoUtility.AESEncryptCollection(data, Globals.getMasterKey());
+
+            data = (List<byte[]>)encResult.Item1; //extracts list of encrypted bytes from result
+            byte[] encName = data[0];
+            byte[] encIPAddress = data[1];
+            byte[] IV = encResult.Item2; //initialisation vector used to encrypt both values
+
+            //non-return query on database
+            //db.update($"INSERT INTO Users (username, IPAddress, IV) VALUES (\"{encName}\",\"{encIPAddress}\",\"{IV}\")");
+            db.userInsert($"INSERT INTO Users (username, IPAddress, IV) VALUES (@username,@IPAddress,@IV)",encName,encIPAddress,IV);
+            loadContacts(); //reload list form DB
         }
 
         //reads contact info from database and creates Contact objects
@@ -95,8 +109,14 @@ namespace MessageAppGUI
             while(reader.Read()) //pretty sure this just returns false if there is no data
             {
                 int ID = Convert.ToInt32((long)reader["userID"]); //sqlite handles primary key field as int64
-                string username = (string)reader["username"];
-                string IPAddress = (string)reader["IPAddress"];
+                byte[] encUsername = (byte[])reader["username"];
+                byte[] encIPAddress = (byte[])reader["IPAddress"];
+                byte[] IV = (byte[])reader["IV"]; //initialisation vector encUsername and ecnIPAddress were encrypted with
+
+                byte[] masterKey = Globals.getMasterKey(); //decrypts and gets master key
+
+                string username = CryptoUtility.AESDecrypt(encUsername, masterKey, IV); //decrypt username
+                string IPAddress = CryptoUtility.AESDecrypt(encIPAddress, masterKey, IV); //decrypt IPAddress
 
                 contact = new Contact(ID, username, IPAddress); //puts contact info into object
                 contactsList.Add(contact);

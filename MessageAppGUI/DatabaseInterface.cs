@@ -36,6 +36,15 @@ namespace MessageAppGUI
             command.ExecuteNonQuery();
         }
 
+        public void userInsert(string queryString, byte[] username, byte[] IPAddress, byte[] IV)
+        {
+            SQLiteCommand command = new SQLiteCommand(queryString, db); //object manages execution
+            command.Parameters.Add(new SQLiteParameter("@username", username)); //adds username blob to parameters
+            command.Parameters.Add(new SQLiteParameter("@IPAddress", IPAddress));
+            command.Parameters.Add(new SQLiteParameter("@IV", IV));
+            command.ExecuteNonQuery();
+        }
+
         //runs given query on given database connection, returns SQLiteDataReader
         public SQLiteDataReader retrieve(String queryString)//, SQLiteConnection db)
         {
@@ -57,7 +66,8 @@ namespace MessageAppGUI
             db = new SQLiteConnection($"Data Source={dbName};Version=3;"); //creates connection to database
             db.Open(); //opens connection (aka it's ready to use)
 
-            update("CREATE TABLE Users (userID INTEGER PRIMARY KEY, username VARCHAR(50) DEFAULT \"unknown\", IPAddress VARCHAR(20) DEFAULT \"0.0.0.0\")");
+            //username and IPAddress are encrypted, IV (Initialisation Vector) is the raw byte array
+            update("CREATE TABLE Users (userID INTEGER PRIMARY KEY, username BLOB, IPAddress BLOB, IV BLOB)");
             update("CREATE TABLE Messages (messageID INTEGER PRIMARY KEY, conversationID INTEGER REFERENCES Users(userID), sent BOOLEAN, message VARCHAR(2000))");
         }
     }

@@ -199,7 +199,7 @@ namespace MessageApp
             string salt = "same value every time because the same key must always be derived from the same password";
             byte[] saltBytes = Encoding.UTF8.GetBytes(salt);
 
-            return new PasswordDeriveBytes(passwordBytes, saltBytes, "SHA1", 2).GetBytes(128 / 8); //number of bits / bits in a byte
+            return new PasswordDeriveBytes(passwordBytes, saltBytes, "SHA1", 2).GetBytes(AESkeyLength / 8); //number of bits / bits in a byte
         }
         /// <summary>
         /// Generates a new random AES key
@@ -208,7 +208,7 @@ namespace MessageApp
         public static byte[] GenerateAESRandomKey()
         {
             aesCSP.BlockSize = 128;
-            aesCSP.KeySize = Globals.AES_KEY_LENGTH;
+            aesCSP.KeySize = AESkeyLength;
             aesCSP.GenerateKey();
 
             return aesCSP.Key; //return key
@@ -221,22 +221,77 @@ namespace MessageApp
         /// <returns>tuple containing encrypted bytes and initialisation vector</returns>
         public static Tuple<byte[],byte[]> AESEncrypt(byte[] plainDataBytes, byte[] key)
         {
+            //aesCSP.BlockSize = 128;
+            //aesCSP.KeySize = Globals.AES_KEY_LENGTH;
+            //aesCSP.Key = key; //set key for encrption
+            //aesCSP.GenerateIV(); //create initialisation vector
+            //aesCSP.Mode = CipherMode.CBC;
+            //aesCSP.Padding = PaddingMode.PKCS7;
+
+            ////byte[] plainDataBytes = Encoding.UTF8.GetBytes(data); //convert string to bytes
+
+            //ICryptoTransform transform = aesCSP.CreateEncryptor(); //object that does encryption
+            //byte[] encryptedBytes = transform.TransformFinalBlock(plainDataBytes, 0, plainDataBytes.Length); //do the encryption
+
+            //byte[] IV = aesCSP.IV;
+
+            //return new Tuple<byte[], byte[]>(encryptedBytes, IV);
+            
+            aesCSP.GenerateIV(); //generate Initialisation vector
+            byte[] IV = aesCSP.IV;  //extract it
+            return AESEncryptWithIV(plainDataBytes, key, IV);
+        }
+
+        /// <summary>
+        /// Takes any provided key and initialisation vector and uses it to encrypt the provided data. returns the encrypted data plus initialisation vector
+        /// </summary>
+        /// <param name="plainDataBytes"></param>
+        /// <param name="key"></param>
+        /// <param name="IV"></param>
+        /// <returns>tuple containing encrypted bytes and initialisation vector</returns>
+        public static Tuple<byte[], byte[]> AESEncryptWithIV(byte[] plainDataBytes, byte[] key, byte[] IV)
+        {
             aesCSP.BlockSize = 128;
-            aesCSP.KeySize = Globals.AES_KEY_LENGTH;
+            aesCSP.KeySize = AESkeyLength;
             aesCSP.Key = key; //set key for encrption
-            aesCSP.GenerateIV(); //create initialisation vector
             aesCSP.Mode = CipherMode.CBC;
             aesCSP.Padding = PaddingMode.PKCS7;
 
+            aesCSP.IV = IV;
             //byte[] plainDataBytes = Encoding.UTF8.GetBytes(data); //convert string to bytes
 
             ICryptoTransform transform = aesCSP.CreateEncryptor(); //object that does encryption
             byte[] encryptedBytes = transform.TransformFinalBlock(plainDataBytes, 0, plainDataBytes.Length); //do the encryption
 
-            byte[] IV = aesCSP.IV;
 
             return new Tuple<byte[], byte[]>(encryptedBytes, IV);
         }
+        /// <summary>
+        /// Takes an IEnumerable collection of byte[] of data to be encrypted and the key to encrypt them with.
+        /// returns a Tuple with an IEnumerable collection with the encrypted bytes and a byte[] containing the initialisation vector.
+        /// All items in collection will be encrypted with the same initialisation vector.
+        /// </summary>
+        /// <param name="collection">IEnumerable collection of byte[] to be encrypted</param>
+        /// <param name="key">key to encrypt collection with</param>
+        /// <returns>Tuple containing collection of encrypted byte[] and the initialisation vector</returns>
+        public static Tuple<IEnumerable<byte[]>,byte[]> AESEncryptCollection(IEnumerable<byte[]> collection, byte[] key)
+        {
+            aesCSP.GenerateIV();    //generate Initialisation vector to be used for collection
+            byte[] IV = aesCSP.IV;  //extract it
+
+            Tuple<byte[], byte[]> enc; //will hold return from AESEncryptWithIV
+            List<byte[]> encryptedList = new List<byte[]>(); //will hold just the encrypted bytes that are returned
+
+            foreach (byte[] item in collection) //iterate over collection to be encrypted
+            {
+                enc = AESEncryptWithIV(item, key, IV); //encrypt
+                encryptedList.Add(enc.Item1); //takes encrypted bytes from returned tuple and stores them in list
+            }
+
+            return new Tuple<IEnumerable<byte[]>, byte[]>(encryptedList, IV); //return list + IV
+        }
+
+
         /// <summary>
         /// Takes encrypted data, AES key and the initialisation vector and returns the decrypted string
         /// </summary>
@@ -247,7 +302,7 @@ namespace MessageApp
         public static string AESDecrypt(byte[] encDataBytes, byte[] key, byte[] IV)
         {
             aesCSP.BlockSize = 128;
-            aesCSP.KeySize = Globals.AES_KEY_LENGTH; //128 at the moment
+            aesCSP.KeySize = AESkeyLength; //128 at the moment
             aesCSP.Key = key; //set key for encrption
             aesCSP.IV = IV; //set the initialisation vector to what was used to originally encrypt the data
             aesCSP.Mode = CipherMode.CBC;

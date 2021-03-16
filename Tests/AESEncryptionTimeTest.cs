@@ -18,9 +18,9 @@ namespace Tests
             test(128, 100);
             test(128, 501); //only testing up to 501 as that's the maximum allowed message length (because of chosen length of RSA key)
 
-            test(196, 10);  //196 bit key
-            test(196, 100);
-            test(196, 501);
+            test(192, 10);  //196 bit key
+            test(192, 100);
+            test(192, 501);
 
             test(256, 10);  //256 bit key
             test(256, 100);

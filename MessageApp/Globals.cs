@@ -20,7 +20,7 @@ namespace MessageApp
         /// <param name="password">Password entered by user on startup</param>
         public static void setMasterKey(string password)
         {
-            byte[] masterKey = CryptoUtility.generateAESMasterKey(password); //converts password to key bytes
+            masterKey = CryptoUtility.generateAESMasterKey(password); //converts password to key bytes
             //Console.WriteLine($"Master key: {Convert.ToBase64String(masterKey)}");
             masterKey = ProtectedData.Protect(masterKey, additionalEntropy, DataProtectionScope.LocalMachine); //encrypts in memory
             //Console.WriteLine($"Protected Master key: {Convert.ToBase64String(masterKey)}");
