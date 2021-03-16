@@ -13,11 +13,10 @@ namespace UnitTests
     [TestClass]
     public class DatabaseTest
     {
-        private const string INTEGRATION_TEST = "Integration Test";
         private const string DB_NAME = "testDB"; //name of the test database file
         private string DBFilePath = $"{Environment.CurrentDirectory}/{DB_NAME}.sqlite"; //path to database file
 
-        [TestCategory(INTEGRATION_TEST)]
+        [TestCategory(TestGlobals.INTEGRATION_TEST)]
         [TestMethod]
         //creates DB, inserts some data and reads it back
         public void AcreateDB() //apparently unit tests are executed in alphabetical order, I want this one done first so the second tests accessing an existing one
@@ -40,7 +39,7 @@ namespace UnitTests
             Assert.AreEqual<String>(username, "Michael"); //asserts that name was correctly retrieved
         }
 
-        [TestCategory(INTEGRATION_TEST)]
+        [TestCategory(TestGlobals.INTEGRATION_TEST)]
         [TestMethod]
         //opens existing DB and retrieves some data
         public void BaccessDB()

@@ -12,7 +12,7 @@ namespace MessageAppGUI
     /// </summary>
     class ContactManager
     {
-        private const string DB_NAME = "MessageAppDB"; //name of database the application will work with
+        //private const string DB_NAME = "MessageAppDB"; //name of database the application will work with
         DatabaseInterface db;
 
         public List<Contact> contactsList { get; } = new List<Contact>();//keeps list of contacts in memory
@@ -21,7 +21,7 @@ namespace MessageAppGUI
 
         public ContactManager()
         {
-            db = new DatabaseInterface(DB_NAME);
+            db = new DatabaseInterface(Globals.DB_NAME);
             loadContacts(); //loads contacts from database into list
         }
        /// <summary>

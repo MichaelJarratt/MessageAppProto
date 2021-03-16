@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -58,6 +59,12 @@ namespace MessageApp
         }
 
         //takes a message and a key and returns the message encrypted with the key
+        /// <summary>
+        /// RSA - Takes a string message and a key and returns the message encrypted with the key
+        /// </summary>
+        /// <param name="message">string of message to be encrypted</param>
+        /// <param name="key">key to encrypt message with</param>
+        /// <returns>base64 encoded string representation of encrypted message</returns>
         public static string encryptData(string message, string key)
         {
             Byte[] messageBytes = Encoding.UTF8.GetBytes(message);
@@ -81,27 +88,27 @@ namespace MessageApp
             RSACryptoServiceProvider decrypter = new RSACryptoServiceProvider(); //create instance that will do the decryption
             decrypter.ImportParameters(keyStringToRSAParam(key)); //converts the keystring to a key and sets it
             messageBytes = decrypter.Decrypt(messageBytes, false);
-            
+
             String decryptedMessage = Encoding.UTF8.GetString(messageBytes); //turns bytes back into string
             return decryptedMessage;
         }
 
-        //https://stackoverflow.com/questions/17128038/c-sharp-rsa-encryption-decryption-with-transmission
-        public static void encrypt(string message)
-        {
-            Byte[] messageBytes = Encoding.UTF8.GetBytes(message);
+        ////https://stackoverflow.com/questions/17128038/c-sharp-rsa-encryption-decryption-with-transmission
+        //public static void encrypt(string message)
+        //{
+        //    Byte[] messageBytes = Encoding.UTF8.GetBytes(message);
 
-            RSACryptoServiceProvider rcsp = new RSACryptoServiceProvider(2024); //2024 bit key
-            RSAParameters privkey = rcsp.ExportParameters(true); //get private to use for this isntance of program
-            RSAParameters pubKey = rcsp.ExportParameters(false); //get public to use for this isntance of program
+        //    RSACryptoServiceProvider rcsp = new RSACryptoServiceProvider(2024); //2024 bit key
+        //    RSAParameters privkey = rcsp.ExportParameters(true); //get private to use for this isntance of program
+        //    RSAParameters pubKey = rcsp.ExportParameters(false); //get public to use for this isntance of program
 
-            rcsp = new RSACryptoServiceProvider(); //generates with random key
-            rcsp.ImportParameters(pubKey);
+        //    rcsp = new RSACryptoServiceProvider(); //generates with random key
+        //    rcsp.ImportParameters(pubKey);
 
-            Byte[] messageCypher = rcsp.Encrypt(messageBytes, false); //encrypt with public key
-            Console.WriteLine(Convert.ToBase64String(messageCypher));
+        //    Byte[] messageCypher = rcsp.Encrypt(messageBytes, false); //encrypt with public key
+        //    Console.WriteLine(Convert.ToBase64String(messageCypher));
 
-        }
+        //}
 
         /// <summary>
         /// Creates a signature of messageString using this instances private key and SHA256
@@ -153,8 +160,8 @@ namespace MessageApp
 
             try
             {
-               //valid = RSACSP.VerifyData(messageBytes, SHA1.Create(), receivedSignature);
-               valid = RSACSP.VerifyData(messageBytes, receivedSignature, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1); //I have no idea why this one works and the other doesn't. fuck it.
+                //valid = RSACSP.VerifyData(messageBytes, SHA1.Create(), receivedSignature);
+                valid = RSACSP.VerifyData(messageBytes, receivedSignature, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1); //I have no idea why this one works and the other doesn't. fuck it.
             }
             catch (Exception)
             {
@@ -169,6 +176,87 @@ namespace MessageApp
         public static void setServiceProvider(RSACryptoServiceProvider provider)
         {
             rcsp = provider;
+        }
+
+        //
+        //
+        //
+        //
+        // AES encryption/decryption
+        // https://www.youtube.com/watch?v=LOmgFxPHop0&ab_channel=GaurAssociates -this resource was very helpful here
+
+        private static AesCryptoServiceProvider aesCSP = new AesCryptoServiceProvider();
+        public static int AESkeyLength = Globals.AES_KEY_LENGTH; //this is public incase length needs to be overwritten for testing
+
+        /// <summary>
+        /// Takes password entered by user and generates and AES 128 key for it
+        /// </summary>
+        /// <param name="password">password entered by user</param>
+        /// <returns>Byte[] AES 128 key</returns>
+        public static byte[] generateAESMasterKey(string password)
+        {
+            byte[] passwordBytes = Encoding.UTF8.GetBytes(password);
+            string salt = "same value every time because the same key must always be derived from the same password";
+            byte[] saltBytes = Encoding.UTF8.GetBytes(salt);
+
+            return new PasswordDeriveBytes(passwordBytes, saltBytes, "SHA1", 2).GetBytes(128 / 8); //number of bits / bits in a byte
+        }
+        /// <summary>
+        /// Generates a new random AES key
+        /// </summary>
+        /// <returns>Byte[] containing AES key </returns>
+        public static byte[] GenerateAESRandomKey()
+        {
+            aesCSP.BlockSize = 128;
+            aesCSP.KeySize = Globals.AES_KEY_LENGTH;
+            aesCSP.GenerateKey();
+
+            return aesCSP.Key; //return key
+        }
+        /// <summary>
+        /// Takes any provided key and uses it to ecnrypt the provided data. Returns the encrypted data plus initialisation vector.
+        /// </summary>
+        /// <param name="data"></param>
+        /// <param name="key"></param>
+        /// <returns>tuple containing encrypted bytes and initialisation vector</returns>
+        public static Tuple<byte[],byte[]> AESEncrypt(byte[] plainDataBytes, byte[] key)
+        {
+            aesCSP.BlockSize = 128;
+            aesCSP.KeySize = Globals.AES_KEY_LENGTH;
+            aesCSP.Key = key; //set key for encrption
+            aesCSP.GenerateIV(); //create initialisation vector
+            aesCSP.Mode = CipherMode.CBC;
+            aesCSP.Padding = PaddingMode.PKCS7;
+
+            //byte[] plainDataBytes = Encoding.UTF8.GetBytes(data); //convert string to bytes
+
+            ICryptoTransform transform = aesCSP.CreateEncryptor(); //object that does encryption
+            byte[] encryptedBytes = transform.TransformFinalBlock(plainDataBytes, 0, plainDataBytes.Length); //do the encryption
+
+            byte[] IV = aesCSP.IV;
+
+            return new Tuple<byte[], byte[]>(encryptedBytes, IV);
+        }
+        /// <summary>
+        /// Takes encrypted data, AES key and the initialisation vector and returns the decrypted string
+        /// </summary>
+        /// <param name="data">The encrypted string bytes</param>
+        /// <param name="key">The key bytes that encrypted the string</param>
+        /// <param name="IV">The initialisation vector used to encrypt the string</param>
+        /// <returns>Decrypted string</returns>
+        public static string AESDecrypt(byte[] encDataBytes, byte[] key, byte[] IV)
+        {
+            aesCSP.BlockSize = 128;
+            aesCSP.KeySize = Globals.AES_KEY_LENGTH; //128 at the moment
+            aesCSP.Key = key; //set key for encrption
+            aesCSP.IV = IV; //set the initialisation vector to what was used to originally encrypt the data
+            aesCSP.Mode = CipherMode.CBC;
+            aesCSP.Padding = PaddingMode.PKCS7;
+
+            ICryptoTransform transform = aesCSP.CreateDecryptor(); //object that does decryption
+            byte[] decryptedBytes = transform.TransformFinalBlock(encDataBytes, 0, encDataBytes.Length);
+
+            return Encoding.UTF8.GetString(decryptedBytes);
         }
 
     }

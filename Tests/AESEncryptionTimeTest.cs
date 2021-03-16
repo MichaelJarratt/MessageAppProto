@@ -1,44 +1,42 @@
-﻿using MessageApp;
-using System;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
-using System.Security.Cryptography;
-using System.Text;
 using System.Linq;
+using System.Text;
+using MessageApp;
 
 namespace Tests
 {
-    //this class runs encryption and decryption functions at various message and key lengths and reports their times and standard deviations
-    //doing it localy like this eliminates the uncontrollable variable of the network
-    class EncryptionTimeTest
+    public class AESEncryptionTimeTest
     {
         private Stopwatch stopWatch = new Stopwatch();
-        private RSACryptoServiceProvider localSet; //represents local key pair
-        private RSACryptoServiceProvider remoteSet; //represents key pair held by another instance of the application
-       
-        public EncryptionTimeTest()
+        private byte[] AESKey;
+
+        public AESEncryptionTimeTest()
         {
-            test(2048, 10);
-            test(2048, 100);
-            test(2048, 245); //longest possible message with keyLength 2048 bits /8 = 256 bytes (characters) - 11 for headers = 245
+            test(128, 10);  //128 bit key (16 bytes)
+            test(128, 100);
+            test(128, 501); //only testing up to 501 as that's the maximum allowed message length (because of chosen length of RSA key)
 
-            test(4096, 10);
-            test(4096, 100);
-            test(4096, 501); //longest possible message with keyLength 4096
+            test(196, 10);  //196 bit key
+            test(196, 100);
+            test(196, 501);
 
-            test(6144, 10);
-            test(6144, 100);
-            test(6144, 757); //lonest possible message with keyLength 6144
+            test(256, 10);  //256 bit key
+            test(256, 100);
+            test(256, 501);
         }
 
 
         private void test(int keyLength, int messageLegth)
         {
             //setup
-            string message = new string('a', messageLegth);
-            localSet = new RSACryptoServiceProvider(keyLength);
-            remoteSet = new RSACryptoServiceProvider(keyLength);
+            string message = new string('a', messageLegth); //creates stirng of "a" of length <messageLength>
             int tests = 100; //how many tests to run
             TestResult[] testResults = new TestResult[tests];
+
+            CryptoUtility.AESkeyLength = keyLength; //set up CryptoUtility to use correct key length
+            AESKey = CryptoUtility.GenerateAESRandomKey(); //gets random key for set of tests
 
             //first run done seporately because of set up time
             TestResult firstRun = process(message);
@@ -63,7 +61,7 @@ namespace Tests
             //total time
             int[] totalTimes = extractField(results, TestResult.Field.TotalTime); //gets array with total times of every result
             double totalTimeAVG = totalTimes.Average();
-            double totalTimeSD = Math.Sqrt(totalTimes.Select(val => (val - totalTimeAVG) * (val - totalTimeAVG)).Sum()/totalTimes.Length);
+            double totalTimeSD = Math.Sqrt(totalTimes.Select(val => (val - totalTimeAVG) * (val - totalTimeAVG)).Sum() / totalTimes.Length);
             //encryptionTime
             int[] encryptionTimes = extractField(results, TestResult.Field.EncryptionTime); //gets array with encryption times of every result
             double encryptionTimeAVG = encryptionTimes.Average();
@@ -95,7 +93,7 @@ namespace Tests
             int[] outArr = new int[results.Length];
 
             //extract total time
-            if(field == TestResult.Field.TotalTime)
+            if (field == TestResult.Field.TotalTime)
             {
                 for (int i = 0; i < outArr.Length; i++)
                 {
@@ -127,28 +125,28 @@ namespace Tests
         {
             TestResult testResult = new TestResult();
 
-            //encryption//
+            //encryption
             stopWatch.Start();
-            CryptoUtility.setServiceProvider(localSet); //give local key set to utility
-            Byte[] signatureBytes = CryptoUtility.signMessage(message); //creates signature for message with "local" key set
-            CryptoUtility.setServiceProvider(remoteSet); //give remote key set to utility
-            Byte[] messageBytes = Encoding.UTF8.GetBytes(CryptoUtility.encryptData(message, CryptoUtility.getPublicKey())); //encrypts with remote public key of "recipient"
+            byte[] plainMessageBytes = Encoding.UTF8.GetBytes(message); //convert message to byte array
+            Tuple<byte[], byte[]> res = CryptoUtility.AESEncrypt(plainMessageBytes, AESKey); //encrypts data
+            //extract results
+            byte[] encMessageBytes = res.Item1; //gets encrypted bytes from tuple
+            byte[] IV = res.Item2; //gets initialisation vector from tuple
             stopWatch.Stop();
-            testResult.encryptionTime = (int)stopWatch.ElapsedMilliseconds;
-            testResult.totalLength = signatureBytes.Length + messageBytes.Length;
+            testResult.encryptionTime = (int)stopWatch.ElapsedMilliseconds; //store time taken
+            testResult.totalLength = encMessageBytes.Length; //store length of encrypted message
+
 
             //decryption//
-            //stopWatch.Restart();
             stopWatch.Reset();
             stopWatch.Start();
-            //decrypts message with "recipients" remote private key. CryptoUtility already has the remote keyset as it's service provider
-            String decMessage = CryptoUtility.decryptData(Encoding.UTF8.GetString(messageBytes), CryptoUtility.getPrivateKey());
-            CryptoUtility.setServiceProvider(localSet); //give it the "senders" public key
-            bool validSig = CryptoUtility.validateSignature(Encoding.UTF8.GetBytes(message), signatureBytes, CryptoUtility.getPublicKey());
+            //passes back encrypted message, key and initialisation vector to decrypt it
+            string decryptedMessage = CryptoUtility.AESDecrypt(encMessageBytes, AESKey, IV);
             stopWatch.Stop();
             testResult.decryptionTime = (int)stopWatch.ElapsedMilliseconds;
 
-            if(!validSig || 0 != String.Compare(decMessage,message)) //if signature failed to validate or the messages are not the same
+            //check that nothing went wrong
+            if (0 != String.Compare(decryptedMessage, message)) 
             {
                 throw new Exception("something ain't right");
             }
@@ -159,7 +157,7 @@ namespace Tests
 
         static void Main(string[] args)
         {
-            new EncryptionTimeTest();
+            new AESEncryptionTimeTest();
         }
 
 
@@ -173,7 +171,7 @@ namespace Tests
 
             public enum Field
             {
-                TotalLength,TotalTime,EncryptionTime,DecryptionTime
+                TotalLength, TotalTime, EncryptionTime, DecryptionTime
             }
         }
     }
