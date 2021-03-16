@@ -230,7 +230,7 @@
             this.Controls.Add(this.contactsLabel);
             this.Controls.Add(this.contactsPanel);
             this.Name = "MessageAppForm";
-            this.Text = "Form2";
+            this.Text = "Secure Messaging";
             this.Load += new System.EventHandler(this.MessageAppForm_Load);
             ((System.ComponentModel.ISupportInitialize)(this.bindingSource1)).EndInit();
             this.addContactsPanel.ResumeLayout(false);

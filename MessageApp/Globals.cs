@@ -20,17 +20,20 @@ namespace MessageApp
         /// <param name="password">Password entered by user on startup</param>
         public static void setMasterKey(string password)
         {
-            byte[] keyBytes = Encoding.UTF8.GetBytes(password); //converts password to bytes
-            masterKey = ProtectedData.Protect(keyBytes, additionalEntropy, DataProtectionScope.LocalMachine); //encrypts in memory
+            byte[] masterKey = CryptoUtility.generateAESMasterKey(password); //converts password to key bytes
+            //Console.WriteLine($"Master key: {Convert.ToBase64String(masterKey)}");
+            masterKey = ProtectedData.Protect(masterKey, additionalEntropy, DataProtectionScope.LocalMachine); //encrypts in memory
+            //Console.WriteLine($"Protected Master key: {Convert.ToBase64String(masterKey)}");
         }
         /// <summary>
-        /// 
+        /// Decrypts and returns master key
         /// </summary>
-        /// <returns>String representation of AES key</returns>
-        public static string getMasterKey()
+        /// <returns>Byte array AES key</returns>
+        public static byte[] getMasterKey()
         {
             byte[] keyBytes = ProtectedData.Unprotect(masterKey, additionalEntropy, DataProtectionScope.LocalMachine); //decrypts in memory
-            return Encoding.UTF8.GetString(keyBytes);
+            //return Encoding.UTF8.GetString(keyBytes);
+            return keyBytes;
         }
     }
 }

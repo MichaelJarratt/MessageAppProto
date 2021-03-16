@@ -206,21 +206,23 @@ namespace MessageAppGUI
             contactManager = new ContactManager(); //manages creation and retrieval of contacts, as well as identifying senders of received messages
             contactManager.setNewContactCallback(newContactCallback);
             messageManager = new MessageManager(); //manages storing and retrieving messages from the database
-            //updateDisplayedContacts(); //gets list of exisiting contacts from ContactManager and displays them in view
 
             Application.Run(messageAppForm); //turns out anything after this does not get executed
-
-            //logic to start server and give it callbacks
-            //setUpServer();
         }
         [STAThread]
         static void Main()
         {
-            //Application.SetHighDpiMode(HighDpiMode.SystemAware);
-            //Application.EnableVisualStyles();
-            //Application.SetCompatibleTextRenderingDefault(false);
-            //Application.Run(new MessageAppForm());
-            new GUIController();
+            ManualResetEvent blockMain = new ManualResetEvent(false);
+            //new PasswordPrompt(blockMain); //handles getting the users password, blocks until it has it
+
+            Thread thread = new Thread(() =>
+            {
+                Application.Run(new PasswordPrompt(blockMain));
+            });
+            //thread.SetApartmentState(ApartmentState.STA);
+            thread.Start();
+            blockMain.WaitOne(); //unblocks when user submits a password
+            new GUIController(); //now that Master key has been generated, start main application
         }
    }
 
