@@ -19,6 +19,7 @@ namespace MessageAppGUI
         {
             InitializeComponent();
             this.unblockMain = unblockMain;
+            CenterToScreen(); //puts itself in the centre of the screen, looks neater
         }
         //when user clicks "submit
         private void PasswordSubmit_Click(object sender, EventArgs e)

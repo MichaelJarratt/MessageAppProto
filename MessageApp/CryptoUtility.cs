@@ -314,5 +314,28 @@ namespace MessageApp
             return Encoding.UTF8.GetString(decryptedBytes);
         }
 
+        /// <summary>
+        /// Takes encrypted data, AES key and the initialisation vector and returns the decrypted byte array.
+        /// Essentially same as AESDecrypt, but returns the data as a byte array.
+        /// </summary>
+        /// <param name="data">The encrypted string bytes</param>
+        /// <param name="key">The key bytes that encrypted the string</param>
+        /// <param name="IV">The initialisation vector used to encrypt the string</param>
+        /// <returns>Decrypted byte array</returns>
+        public static byte[] AESDecryptBytes(byte[] encDataBytes, byte[] key, byte[] IV)
+        {
+            aesCSP.BlockSize = 128;
+            aesCSP.KeySize = AESkeyLength; //128 at the moment
+            aesCSP.Key = key; //set key for encrption
+            aesCSP.IV = IV; //set the initialisation vector to what was used to originally encrypt the data
+            aesCSP.Mode = CipherMode.CBC;
+            aesCSP.Padding = PaddingMode.PKCS7;
+
+            ICryptoTransform transform = aesCSP.CreateDecryptor(); //object that does decryption
+            byte[] decryptedBytes = transform.TransformFinalBlock(encDataBytes, 0, encDataBytes.Length);
+
+            return decryptedBytes;
+        }
+
     }
 }

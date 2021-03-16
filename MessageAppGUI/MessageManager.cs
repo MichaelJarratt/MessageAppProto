@@ -12,12 +12,16 @@ namespace MessageAppGUI
     /// </summary>
     class MessageManager
     {
-        //private const string DB_NAME = "MessageAppDB"; //name of database the application will work with
         DatabaseInterface db;
+        KeyManager keyManager;
 
         public MessageManager()
         {
             db = new DatabaseInterface(Globals.DB_NAME); //creates database interface which connects to <DB_NAME>
+            keyManager = new KeyManager();
+
+            byte[] key = keyManager.getTodaysKey();
+            Console.WriteLine(Convert.ToBase64String(key));
         }
         /// <summary>
         /// Takes message (which must have sender/recipient set) and stores it in the database.

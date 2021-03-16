@@ -23,6 +23,8 @@ namespace MessageAppGUI
             addContactsPanel.Hide(); //start with this panel hidden
             messageParentPanel.Hide(); //starts hidden as well
             this.controller = controller;
+
+            CenterToScreen(); //appear at centre of screen, looks neater.
         }
 
         //form controls (called by controller) //
@@ -173,6 +175,9 @@ namespace MessageAppGUI
         private void MessageAppForm_Load(Object sender, EventArgs e)
         {
             controller.updateDisplayedContacts(); //asks controller to update the visible contacts
+            Show();
+            WindowState = FormWindowState.Normal; //this and show display this form in front of whatever is already there
+            Focus();
         }
         private void toolTip1_Popup(object sender, PopupEventArgs e)
         {
