@@ -15,7 +15,7 @@ namespace MessageAppGUI
 
         public KeyManager()
         {
-            db = new DatabaseInterface(Globals.DB_NAME); //creates database interface which connects to <DB_NAME>
+            db = DatabaseInterface.getInstance(Globals.DB_NAME); //creates database interface which connects to <DB_NAME>
         }
 
         /// <summary>
@@ -58,17 +58,20 @@ namespace MessageAppGUI
         /// and stored.
         /// </summary>
         /// <returns>byte[] containing todays key</returns>
-        public byte[] getTodaysKey()
+        public Key getTodaysKey()
         {
-            SQLiteDataReader reader = db.retrieve("SELECT AESKey, IV FROM Keys WHERE date = CURRENT_DATE"); //gets key with todays date
+            SQLiteDataReader reader = db.retrieve("SELECT keyID, AESKey, IV FROM Keys WHERE date = CURRENT_DATE"); //gets key with todays date
             if(reader.HasRows) //if there were any keys with todays date
             {
                 reader.Read(); //prepares reader to extract data
 
+                int keyID = Convert.ToInt32((long)reader["keyID"]); //sqlite stored primary keys as int64s
                 byte[] encKey = (byte[])reader["AESKey"]; //extract encrypted key
                 byte[] IV = (byte[])reader["IV"]; //extract initialisation vector it was encrypted with
 
-                byte[] key = decryptKey(encKey, IV); //decrypt key
+                byte[] keyBytes = decryptKey(encKey, IV); //decrypt key
+                Key key = new Key(keyID, keyBytes); //creates key object to return
+
                 return key;
             }
             else //must generate new key and create DB entry
@@ -82,14 +85,27 @@ namespace MessageAppGUI
 
                 insertNewKey(encNewKey, IV); //insert it into database
 
-                return newKey; //give new AES key ready to use back to invoker
+                return getTodaysKey(); //1 level of recursion, creates entry then fetches and returns it
             }
         }
 
         //encapsulates logic for inserting new key into database. For tidyness.
         private void insertNewKey(byte[] encKeyBytes, byte[] IV)
         {
-            db.KeyInsert("INSERT INTO Keys (AESKey, IV) VALUES (@AESKey, @IV)", encKeyBytes, IV);
+            db.keyInsert("INSERT INTO Keys (AESKey, IV) VALUES (@AESKey, @IV)", encKeyBytes, IV);
+        }
+    }
+
+    //used to temporarily hold a key and it's ID
+    public class Key
+    {
+        public int keyID;
+        public byte[] keyBytes;
+
+        public Key(int keyID, byte[] keyBytes)
+        {
+            this.keyID = keyID;
+            this.keyBytes = keyBytes;
         }
     }
 }

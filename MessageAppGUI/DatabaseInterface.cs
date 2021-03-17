@@ -12,10 +12,25 @@ namespace MessageAppGUI
     ///</summary>
     public class DatabaseInterface
     {
-        SQLiteConnection db;
+        private static DatabaseInterface dbInterfaceInstance; //singleton instance
+        private SQLiteConnection db; //database object being wrapped
+
+        /// <summary>
+        /// Get an instance of DatabaseInterface, this class is a singleton because it does not need to be instanced, and
+        /// making it a singleton stops conflicts.
+        /// </summary>
+        /// <returns>Instance of DatabaseInterface</returns>
+        public static DatabaseInterface getInstance(string dbName)
+        {
+            if(dbInterfaceInstance == null) //not created yet
+            {
+                dbInterfaceInstance = new DatabaseInterface(dbName); //create singeleton
+            }
+            return dbInterfaceInstance;
+        }
 
         //initialises database with name dbName
-        public DatabaseInterface(string dbName)
+        private DatabaseInterface(string dbName)
         {
             string localDir = Environment.CurrentDirectory; //absolute path of local directory
             dbName += ".sqlite"; //add file extension to filename
@@ -62,10 +77,24 @@ namespace MessageAppGUI
         /// <param name="queryString">String containing the query to execute</param>
         /// <param name="AESKey">Query must have "@AESKey" in place of blob value</param>
         /// <param name="IV">Query must have "@IV" in place of blob value</param>
-        public void KeyInsert(string queryString, byte[] AESKey, byte[] IV)
+        public void keyInsert(string queryString, byte[] AESKey, byte[] IV)
         {
             SQLiteCommand command = new SQLiteCommand(queryString, db); //object manages execution
             command.Parameters.Add(new SQLiteParameter("@AESKey", AESKey)); //adds username blob to parameters
+            command.Parameters.Add(new SQLiteParameter("@IV", IV));
+            command.ExecuteNonQuery();
+        }
+
+        /// <summary>
+        /// Takes a string represnting the query and the byte arrays to be stored as BLOBS.
+        /// </summary>
+        /// <param name="queryString">String containing the query to execute</param>
+        /// <param name="AESKey">Query must have "@message" in place of blob value</param>
+        /// <param name="IV">Query must have "@IV" in place of blob value</param>
+        public void messageInsert(string queryString, byte[] message, byte[] IV)
+        {
+            SQLiteCommand command = new SQLiteCommand(queryString, db); //object manages execution
+            command.Parameters.Add(new SQLiteParameter("@message", message)); //adds username blob to parameters
             command.Parameters.Add(new SQLiteParameter("@IV", IV));
             command.ExecuteNonQuery();
         }
@@ -93,7 +122,9 @@ namespace MessageAppGUI
 
             //username and IPAddress are encrypted, IV (Initialisation Vector) is the raw byte array
             update("CREATE TABLE Users (userID INTEGER PRIMARY KEY, username BLOB, IPAddress BLOB, IV BLOB)");
-            update("CREATE TABLE Messages (messageID INTEGER PRIMARY KEY, conversationID INTEGER REFERENCES Users(userID), sent BOOLEAN, message VARCHAR(2000))");
+            //message is encrypted, IV is the raw byte array
+            update("CREATE TABLE Messages (messageID INTEGER PRIMARY KEY, conversationID INTEGER REFERENCES Users(userID), sent BOOLEAN, message BLOB, keyID INTEGER REFERENCES Keys(keyID), IV BLOB)");
+            //AESKey is encrypted, IV is the raw byte array
             update("CREATE TABLE Keys (keyID INTEGER PRIMARY KEY, AESKey BLOB, DATE date DEFAULT CURRENT_DATE, IV BLOB)");
         }
     }

@@ -17,11 +17,11 @@ namespace MessageAppGUI
 
         public MessageManager()
         {
-            db = new DatabaseInterface(Globals.DB_NAME); //creates database interface which connects to <DB_NAME>
+            db = DatabaseInterface.getInstance(Globals.DB_NAME); //creates database interface which connects to <DB_NAME>
             keyManager = new KeyManager();
 
-            byte[] key = keyManager.getTodaysKey();
-            Console.WriteLine(Convert.ToBase64String(key));
+            //byte[] key = keyManager.getTodaysKey();
+            //Console.WriteLine(Convert.ToBase64String(key));
         }
         /// <summary>
         /// Takes message (which must have sender/recipient set) and stores it in the database.
@@ -43,10 +43,22 @@ namespace MessageAppGUI
                 conversationID = message.sender; //gets ID of sender (ID of target would be zero - aka local)
             }
 
-            string messageString = message.message;
+            Key key = keyManager.getTodaysKey(); //get key being used at time of inserting message
+            byte[] plainMessageBytes = Encoding.UTF8.GetBytes(message.message); //convert message text into byte array
+            Tuple<byte[], byte[]> encResult = CryptoUtility.AESEncrypt(plainMessageBytes, key.keyBytes); //encrypt message with todays key
+
+            byte[] encMessage = encResult.Item1; //extract encrypted message
+            byte[] IV = encResult.Item2; //extract initialisation vector
+            int keyID = key.keyID;
+
+            //runs query and passes blobs to store message
+            db.messageInsert($"INSERT INTO Messages (conversationID, sent, message, keyID, IV) VALUES (\"{conversationID}\",\"{sent}\",@message,\"{keyID}\",@IV)",encMessage,IV);
+
+            //string messageString = message.message;
+
 
             //run query to store it
-            db.update($"INSERT INTO Messages (conversationID, sent, message) VALUES (\"{conversationID}\",\"{sent}\",\"{messageString}\")");
+            //db.update($"INSERT INTO Messages (conversationID, sent, message) VALUES (\"{conversationID}\",\"{sent}\",\"{messageString}\")");
         }
 
         /// <summary>

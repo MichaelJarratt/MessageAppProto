@@ -21,7 +21,7 @@ namespace MessageAppGUI
 
         public ContactManager()
         {
-            db = new DatabaseInterface(Globals.DB_NAME);
+            db = DatabaseInterface.getInstance(Globals.DB_NAME);
             loadContacts(); //loads contacts from database into list
         }
        /// <summary>
