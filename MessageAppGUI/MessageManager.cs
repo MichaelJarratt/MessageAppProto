@@ -71,13 +71,21 @@ namespace MessageAppGUI
             List<Message> messages = new List<Message>();
             Message message; //temp var to hold messages before being put into list
 
-            SQLiteDataReader reader = db.retrieve($"SELECT sent, message FROM Messages WHERE (conversationID = \"{contact.ID}\")");
+            //for <contactID> select every message, initialisation vector to decrypt the message, the ID of the key it's encrypted with, and bool if it was sent or received
+            SQLiteDataReader reader = db.retrieve($"SELECT sent, message, IV, keyID FROM Messages WHERE (conversationID = \"{contact.ID}\")");
             //API BUG - SELECT with explicit fields fails ONLY when the fields are in brackets, lord knows why
 
             while(reader.Read()) //iterate over all existing records
             {
                 bool sent = (bool)reader["sent"]; //extract if message was sent or received
-                string messageString = (string)reader["message"]; //extract message
+                byte[] encMessageBytes = (byte[])reader["message"]; //extract message
+                byte[] messageIV = (byte[])reader["IV"]; //extract initialisation vector for message
+                int keyID = Convert.ToInt32((long)reader["keyID"]); //extract ID of key that encrypted message. sqlite handles forien keys to primary keys as int64.
+
+                byte[] messageKey = keyManager.getKey(keyID); //gets plain key from manager (must be discarded once done with)
+
+                //passes encrypted message bytes, plain key and IV to CryptoUtility and gets decrypted message in return
+                string messageString = CryptoUtility.AESDecrypt(encMessageBytes, messageKey, messageIV);
 
                 int senderID;
                 int targetID;
