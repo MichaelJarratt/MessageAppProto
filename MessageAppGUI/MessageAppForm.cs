@@ -201,7 +201,7 @@ namespace MessageAppGUI
             ContactControl contact = (ContactControl)sender; //typecast sender
             int contactID = contact.ID; //get iD from control
             controller.loadMessages(contactID); //sends ID to controller so it can load message history and create ClientComponent
-            Console.WriteLine($"contact clicked: ID {contactID}");
+            //Console.WriteLine($"contact clicked: ID {contactID}");
         }
         //handler for send message button being pressed
         public void sendMessageButton_Click(object sender, EventArgs e)

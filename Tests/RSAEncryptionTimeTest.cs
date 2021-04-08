@@ -14,9 +14,12 @@ namespace Tests
         private Stopwatch stopWatch = new Stopwatch();
         private RSACryptoServiceProvider localSet; //represents local key pair
         private RSACryptoServiceProvider remoteSet; //represents key pair held by another instance of the application
-       
+
+        private ExcelWriter excelWriter; //class for exporting test data
+
         public RSAEncryptionTimeTest()
         {
+            excelWriter = new ExcelWriter("RSATest"); //create ExcelWriter for the RSA test results
             test(2048, 10);
             test(2048, 100);
             test(2048, 245); //longest possible message with keyLength 2048 bits /8 = 256 bytes (characters) - 11 for headers = 245
@@ -28,6 +31,8 @@ namespace Tests
             test(6144, 10);
             test(6144, 100);
             test(6144, 757); //lonest possible message with keyLength 6144
+
+            excelWriter.saveAndRelease(); //save and close excel file
         }
 
 
@@ -37,7 +42,7 @@ namespace Tests
             string message = new string('a', messageLegth);
             localSet = new RSACryptoServiceProvider(keyLength);
             remoteSet = new RSACryptoServiceProvider(keyLength);
-            int tests = 100; //how many tests to run
+            int tests = 1000; //how many tests to run
             TestResult[] testResults = new TestResult[tests];
 
             //first run done seporately because of set up time
@@ -53,6 +58,9 @@ namespace Tests
             }
             displayResults(testResults, keyLength, messageLegth); //send results to be displayed
             Console.WriteLine();
+
+            //write results to excel file (in memory)
+            excelWriter.addRow(keyLength, messageLegth, testResults);
         }
 
         //calculates and displayes the results in a readable format
@@ -164,17 +172,17 @@ namespace Tests
 
 
 
-        class TestResult
-        {
-            public int totalLength; //length of signature + encrypted message
-            public int encryptionTime;
-            public int decryptionTime;
-            public int totalTime;
+        //public class TestResult
+        //{
+        //    public int totalLength; //length of signature + encrypted message
+        //    public int encryptionTime;
+        //    public int decryptionTime;
+        //    public int totalTime;
 
-            public enum Field
-            {
-                TotalLength,TotalTime,EncryptionTime,DecryptionTime
-            }
-        }
+        //    public enum Field
+        //    {
+        //        TotalLength,TotalTime,EncryptionTime,DecryptionTime
+        //    }
+        //}
     }
 }

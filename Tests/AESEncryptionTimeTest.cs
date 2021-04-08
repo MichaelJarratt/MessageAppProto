@@ -12,8 +12,10 @@ namespace Tests
         private Stopwatch stopWatch = new Stopwatch();
         private byte[] AESKey;
 
+        private ExcelWriter excelWriter; //class for exporting test data
         public AESEncryptionTimeTest()
         {
+            excelWriter = new ExcelWriter("AESTest"); //create ExcelWriter for the RSA test results
             test(128, 10);  //128 bit key (16 bytes)
             test(128, 100);
             test(128, 501); //only testing up to 501 as that's the maximum allowed message length (because of chosen length of RSA key)
@@ -25,6 +27,8 @@ namespace Tests
             test(256, 10);  //256 bit key
             test(256, 100);
             test(256, 501);
+
+            excelWriter.saveAndRelease(); //save and close excel file
         }
 
 
@@ -32,7 +36,7 @@ namespace Tests
         {
             //setup
             string message = new string('a', messageLegth); //creates stirng of "a" of length <messageLength>
-            int tests = 100; //how many tests to run
+            int tests = 1000; //how many tests to run
             TestResult[] testResults = new TestResult[tests];
 
             CryptoUtility.AESkeyLength = keyLength; //set up CryptoUtility to use correct key length
@@ -51,6 +55,9 @@ namespace Tests
             }
             displayResults(testResults, keyLength, messageLegth); //send results to be displayed
             Console.WriteLine();
+
+            //write results to excel file (in memory)
+            excelWriter.addRow(keyLength, messageLegth, testResults);
         }
 
         //calculates and displayes the results in a readable format
@@ -162,17 +169,17 @@ namespace Tests
 
 
 
-        class TestResult
-        {
-            public int totalLength; //length of signature + encrypted message
-            public int encryptionTime;
-            public int decryptionTime;
-            public int totalTime;
+        //class TestResult
+        //{
+        //    public int totalLength; //length of signature + encrypted message
+        //    public int encryptionTime;
+        //    public int decryptionTime;
+        //    public int totalTime;
 
-            public enum Field
-            {
-                TotalLength, TotalTime, EncryptionTime, DecryptionTime
-            }
-        }
+        //    public enum Field
+        //    {
+        //        TotalLength, TotalTime, EncryptionTime, DecryptionTime
+        //    }
+        //}
     }
 }
