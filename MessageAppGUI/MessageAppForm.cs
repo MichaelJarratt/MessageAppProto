@@ -208,5 +208,10 @@ namespace MessageAppGUI
         {
             sendmessage();
         }
+
+        private void MessageAppForm_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            Application.Exit();
+        }
     }
 }

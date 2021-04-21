@@ -28,6 +28,8 @@ namespace MessageAppGUI
             if (password.Length > 0)
             {
                 Globals.setMasterKey(password); //generate globally accessible master key from password
+                password = string.Empty; //clear from variable
+                PasswordTextbox.Text = string.Empty; //I don't know if this is referenced or copied, but clear it to be sure
                 unblockMain.Set(); //unblocks execution of main, message app form will be created
                 submitted = true;
                 this.Close();
@@ -38,7 +40,9 @@ namespace MessageAppGUI
         {
             if(!submitted) //if user closed form without submitting password
             {
+                PasswordTextbox.Text = string.Empty; //clear password
                 Application.Exit(); //closes everything, as it couldn't run without the password. The main thread also would not be unblocked otherwise.
+                
             }
         }
     }

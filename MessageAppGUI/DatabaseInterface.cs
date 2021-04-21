@@ -80,7 +80,7 @@ namespace MessageAppGUI
         public void keyInsert(string queryString, byte[] AESKey, byte[] IV)
         {
             SQLiteCommand command = new SQLiteCommand(queryString, db); //object manages execution
-            command.Parameters.Add(new SQLiteParameter("@AESKey", AESKey)); //adds username blob to parameters
+            command.Parameters.Add(new SQLiteParameter("@AESKey", AESKey)); //adds AESKey blob to parameters
             command.Parameters.Add(new SQLiteParameter("@IV", IV));
             command.ExecuteNonQuery();
         }
@@ -100,7 +100,7 @@ namespace MessageAppGUI
         }
 
         //runs given query on given database connection, returns SQLiteDataReader
-        public SQLiteDataReader retrieve(String queryString)//, SQLiteConnection db)
+        public SQLiteDataReader retrieve(String queryString)
         {
             SQLiteCommand command = new SQLiteCommand(queryString, db);
             SQLiteDataReader reader = command.ExecuteReader();

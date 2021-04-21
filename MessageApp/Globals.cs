@@ -21,9 +21,8 @@ namespace MessageApp
         public static void setMasterKey(string password)
         {
             masterKey = CryptoUtility.generateAESMasterKey(password); //converts password to key bytes
-            //Console.WriteLine($"Master key: {Convert.ToBase64String(masterKey)}");
             masterKey = ProtectedData.Protect(masterKey, additionalEntropy, DataProtectionScope.LocalMachine); //encrypts in memory
-            //Console.WriteLine($"Protected Master key: {Convert.ToBase64String(masterKey)}");
+            password = string.Empty; //clear plaintext password from memory
         }
         /// <summary>
         /// Decrypts and returns master key

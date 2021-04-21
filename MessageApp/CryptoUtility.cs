@@ -153,11 +153,7 @@ namespace MessageApp
         {
             RSACryptoServiceProvider RSACSP = new RSACryptoServiceProvider(); //create CSP to perform functions
             RSACSP.ImportParameters(keyStringToRSAParam(senderPubKey)); //import public key of sender
-
-            //Byte[] signedMessage = signMessage(messageBytes);
-
             bool valid;
-
             try
             {
                 //valid = RSACSP.VerifyData(messageBytes, SHA1.Create(), receivedSignature);

@@ -92,7 +92,6 @@ namespace MessageAppGUI
             byte[] IV = encResult.Item2; //initialisation vector used to encrypt both values
 
             //non-return query on database
-            //db.update($"INSERT INTO Users (username, IPAddress, IV) VALUES (\"{encName}\",\"{encIPAddress}\",\"{IV}\")");
             db.userInsert($"INSERT INTO Users (username, IPAddress, IV) VALUES (@username,@IPAddress,@IV)",encName,encIPAddress,IV);
             loadContacts(); //reload list form DB
         }
@@ -106,7 +105,7 @@ namespace MessageAppGUI
             //if(reader.HasRows) //if any data was read from the DB
             
             Contact contact; //temporary contact object to add to list
-            while(reader.Read()) //pretty sure this just returns false if there is no data
+            while(reader.Read()) //iterate over each tuple returned from the database
             {
                 int ID = Convert.ToInt32((long)reader["userID"]); //sqlite handles primary key field as int64
                 byte[] encUsername = (byte[])reader["username"];

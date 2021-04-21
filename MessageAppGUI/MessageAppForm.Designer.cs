@@ -231,6 +231,7 @@
             this.Controls.Add(this.contactsPanel);
             this.Name = "MessageAppForm";
             this.Text = "Secure Messaging";
+            this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.MessageAppForm_FormClosed);
             this.Load += new System.EventHandler(this.MessageAppForm_Load);
             ((System.ComponentModel.ISupportInitialize)(this.bindingSource1)).EndInit();
             this.addContactsPanel.ResumeLayout(false);

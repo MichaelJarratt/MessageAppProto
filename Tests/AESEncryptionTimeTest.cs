@@ -131,7 +131,6 @@ namespace Tests
         private TestResult process(String message)
         {
             TestResult testResult = new TestResult();
-
             //encryption
             stopWatch.Start();
             byte[] plainMessageBytes = Encoding.UTF8.GetBytes(message); //convert message to byte array
