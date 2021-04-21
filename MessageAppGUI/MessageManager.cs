@@ -47,11 +47,12 @@ namespace MessageAppGUI
             byte[] plainMessageBytes = Encoding.UTF8.GetBytes(message.message); //convert message text into byte array
             Tuple<byte[], byte[]> encResult = CryptoUtility.AESEncrypt(plainMessageBytes, key.keyBytes); //encrypt message with todays key
 
-            key = null; //let the key bytes be garbage collected.
 
             byte[] encMessage = encResult.Item1; //extract encrypted message
             byte[] IV = encResult.Item2; //extract initialisation vector
             int keyID = key.keyID;
+
+            key = null; //let the key bytes be garbage collected.
 
             //runs query and passes blobs to store message
             db.messageInsert($"INSERT INTO Messages (conversationID, sent, message, keyID, IV) VALUES (\"{conversationID}\",\"{sent}\",@message,\"{keyID}\",@IV)",encMessage,IV);

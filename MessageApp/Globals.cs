@@ -34,5 +34,17 @@ namespace MessageApp
             //return Encoding.UTF8.GetString(keyBytes);
             return keyBytes;
         }
+
+        /// <summary>
+        /// Returns true if the master key is set and ready to be retreived, false is not.
+        /// </summary>
+        /// <returns>bool master key is set or not</returns>
+        public static bool isMasterKeySet()
+        {
+            if (masterKey == null) //if the key is being gotten before being set
+                return false;
+            else
+                return true;
+        }
     }
 }

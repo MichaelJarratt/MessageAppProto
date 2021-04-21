@@ -41,6 +41,7 @@ namespace MessageAppGUI
             if(!submitted) //if user closed form without submitting password
             {
                 PasswordTextbox.Text = string.Empty; //clear password
+                unblockMain.Set();
                 Application.Exit(); //closes everything, as it couldn't run without the password. The main thread also would not be unblocked otherwise.
                 
             }

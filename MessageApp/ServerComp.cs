@@ -43,24 +43,14 @@ namespace MessageApp
             blockConnectionListenLoop = new ManualResetEvent(false);
         }
 
-        // THREAD //
-        //loops indefinitely, listens for connections and creates new threads to handle them
-        //if it needs to be stopped, I could store reference to the thread in a field so a method could be used to kill it
-        private void connectionListenLoop()
-        {
-            while (true)
-            {
-                blockConnectionListenLoop.Reset(); //makes threads set to "wait one" be blocked
-                
-                connectionListener.BeginAccept(new AsyncCallback(acceptTCPRequest), connectionListener); //when receiving a request it creates a new thread acceptTCPRequest
-                blockConnectionListenLoop.WaitOne();
-            }
-        }
-        //offers external method to start the loop
+        
+        /// <summary>
+        /// This method begins the listen loop.
+        /// When this method is called incoming TCP requests will be served.
+        /// </summary>
         public void startConnectionListenLoop()
         {
-            Thread connectionListenLoopThread = new Thread(connectionListenLoop);
-            connectionListenLoopThread.Start();
+            connectionListener.BeginAccept(new AsyncCallback(acceptTCPRequest), connectionListener);
         }
 
         // THREAD //
@@ -68,7 +58,7 @@ namespace MessageApp
         //handles creating a receiving socket and then terminates
         private void acceptTCPRequest(IAsyncResult ar)
         {
-            blockConnectionListenLoop.Set(); //unblocks the connection listen loop (so new connections can be handled)
+            connectionListener.BeginAccept(new AsyncCallback(acceptTCPRequest), connectionListener); //immediately tells connectionListener to begin listening again
 
             Socket conListenerTemp = (Socket)ar.AsyncState; //gets the connectionListener socket from the listenLoop (although couldn't this be done via the field?)
             Socket receiveHandler = conListenerTemp.EndAccept(ar); //gets socket that will receive bytes

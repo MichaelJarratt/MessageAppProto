@@ -208,7 +208,6 @@ namespace MessageAppGUI
             messageManager = new MessageManager(); //manages storing and retrieving messages from the database
 
             Application.Run(messageAppForm); //turns out anything after this does not get executed
-            int i = 0;
         }
         [STAThread]
         static void Main()
@@ -223,8 +222,12 @@ namespace MessageAppGUI
             //thread.SetApartmentState(ApartmentState.STA);
             thread.Start();
             blockMain.WaitOne(); //unblocks when user submits a password
-            new GUIController(); //now that Master key has been generated, start main application
-            Application.Exit();
+
+            if (Globals.isMasterKeySet()) //if the user set the password in the PasswordPrompt form
+            {
+                new GUIController(); //now that Master key has been generated, start main application
+            }
+            //if not then just return out
         }
    }
 
