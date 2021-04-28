@@ -175,7 +175,7 @@ namespace MessageAppGUI
                     message = "Error sending message.\nUnspecified transmission error";
                     break;
                 case TransmissionErrorCode.CliNoReceiveConfirmaton:
-                    message = "Error sending message.\nDid not get confirmation of message being succesfully received by client";
+                    message = "Error sending message.\nDid not get confirmation of message being succesfully received by contact";
                     break;
                 case TransmissionErrorCode.ServTotalLengthError:
                     message = "Error receiving message.\nTotal length of transmission did not match actual length";

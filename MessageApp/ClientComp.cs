@@ -107,7 +107,7 @@ namespace MessageApp
             //totalLengthBytes = lengthIntToBytes(1500);
             //signatureLengthBytes = lengthIntToBytes(260); 
             //messageLengthBytes = lengthIntToBytes(2000);
-            //signatureBytes[0] = 0; // 1 in 256 chance that [0] would actually be 0
+            signatureBytes[0] = 0; // 1 in 256 chance that [0] would actually be 0
             //messageBytes[0] = 0;
 
 
