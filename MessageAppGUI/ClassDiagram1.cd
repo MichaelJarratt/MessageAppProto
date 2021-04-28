@@ -1,0 +1,90 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="MessageAppGUI.GUIController">
+    <Position X="6.5" Y="2.25" Width="2" />
+    <Members>
+      <Field Name="currentSubject" Hidden="true" />
+      <Method Name="displayMessage" Hidden="true" />
+      <Method Name="displayMessages" Hidden="true" />
+      <Method Name="GUIController" Hidden="true" />
+      <Method Name="Main" Hidden="true" />
+      <Field Name="MAX_MESSAGE_LENGTH" Hidden="true" />
+      <Method Name="setUpClient" Hidden="true" />
+      <Method Name="setUpServer" Hidden="true" />
+    </Members>
+    <NestedTypes>
+      <Delegate Name="MessageAppGUI.GUIController.MAFDisplayContactsDelegate" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>GUIController.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Delegate>
+      <Delegate Name="MessageAppGUI.GUIController.MAFDisplayMessageDelegate" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>GUIController.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Delegate>
+      <Delegate Name="MessageAppGUI.GUIController.MAFDisplayMessagesDelegate" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>GUIController.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Delegate>
+    </NestedTypes>
+    <TypeIdentifier>
+      <HashCode>IAAGQAAAQAAAAAAAAAAAAgCgDCEAAAUAACgABABAAgA=</HashCode>
+      <FileName>GUIController.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="messageAppForm" />
+      <Field Name="clientComp" />
+      <Field Name="contactManager" />
+      <Field Name="messageManager" />
+      <Field Name="serverComp" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="MessageAppGUI.Contact">
+    <Position X="4.5" Y="2.75" Width="1.5" />
+    <Members>
+      <Field Name="additionalEntropy" Hidden="true" />
+      <Field Name="ipBytes" Hidden="true" />
+      <Method Name="protect" Hidden="true" />
+    </Members>
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAgCAAAAAAAAAAAAAAAAAAAAACAAAAaAA=</HashCode>
+      <FileName>GUIController.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MessageAppGUI.ContactManager">
+    <Position X="9.25" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AGAEAAAEAAAQAAAAAAAABgAAAACAQAAAABAAAAAAAAA=</HashCode>
+      <FileName>ContactManager.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MessageAppGUI.MessageAppForm">
+    <Position X="2" Y="0.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AUCAAgAAACQAAAEAEBGAAAgDiCsCAAQ0AGILAEEQIAQ=</HashCode>
+      <FileName>MessageAppForm.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MessageApp.ClientComp">
+    <Position X="10.75" Y="1" Width="1.5" />
+    <TypeIdentifier />
+  </Class>
+  <Class Name="MessageAppGUI.MessageManager">
+    <Position X="11" Y="5.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>ACAAAAAAAAAQAAAAAEAAAAAAAAAAAAAAAAAAIAAAAAA=</HashCode>
+      <FileName>MessageManager.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MessageApp.ServerComp" Collapsed="true">
+    <Position X="12" Y="0.5" Width="1.5" />
+    <TypeIdentifier />
+  </Class>
+  <Class Name="MessageApp.CryptoUtility">
+    <Position X="13.5" Y="1.5" Width="1.5" />
+    <TypeIdentifier />
+  </Class>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>
