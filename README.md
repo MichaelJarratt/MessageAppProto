@@ -6,4 +6,4 @@ The purpose of the project was to create an application that does not compromise
 
 The files contain an extract of the relavent parts of my dissertation, the parts which explain how its implemented, class diagrams, object sequence diagrams, and the testing section.
 
-As far as I know the application really is safe to use, but if you're routing around the code or running your own tests and discover an issue, please do contact me.
+As far as I know the application really is safe to use, but if you're rooting around the code or running your own tests and discover an issue, please do contact me.
