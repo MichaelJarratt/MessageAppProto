@@ -13,7 +13,6 @@ namespace MessageApp
         private int listenPort; //port the socket will listen to
 
         private Socket connectionListener; //socker that listens for incoming connections
-        private ManualResetEvent blockConnectionListenLoop; //blocks loop listening to connections until a connection is received
         
         Action<Message> controllerReturn; // Action can hold a reference to a method, this references the call back handler on MessageApp that prints the received message
         //Action<String> is a void return method that takes one string. Action<String,String> takes two
@@ -40,7 +39,6 @@ namespace MessageApp
             connectionListener.Bind(localEndPoint);
             connectionListener.Listen(10);
 
-            blockConnectionListenLoop = new ManualResetEvent(false);
         }
 
         
@@ -151,7 +149,7 @@ namespace MessageApp
                 Message message = new Message(messageString, senderIP); //creates message object with content and IP of the sender
                 controllerReturn(message);
             }
-            else
+            else //signature invalid
             {
                 reportReceiveError(TransmissionErrorCode.ServValidationFail); //report signature failed to validate
             }
