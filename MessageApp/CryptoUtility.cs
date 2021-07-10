@@ -93,23 +93,6 @@ namespace MessageApp
             return decryptedMessage;
         }
 
-        ////https://stackoverflow.com/questions/17128038/c-sharp-rsa-encryption-decryption-with-transmission
-        //public static void encrypt(string message)
-        //{
-        //    Byte[] messageBytes = Encoding.UTF8.GetBytes(message);
-
-        //    RSACryptoServiceProvider rcsp = new RSACryptoServiceProvider(2024); //2024 bit key
-        //    RSAParameters privkey = rcsp.ExportParameters(true); //get private to use for this isntance of program
-        //    RSAParameters pubKey = rcsp.ExportParameters(false); //get public to use for this isntance of program
-
-        //    rcsp = new RSACryptoServiceProvider(); //generates with random key
-        //    rcsp.ImportParameters(pubKey);
-
-        //    Byte[] messageCypher = rcsp.Encrypt(messageBytes, false); //encrypt with public key
-        //    Console.WriteLine(Convert.ToBase64String(messageCypher));
-
-        //}
-
         /// <summary>
         /// Creates a signature of messageString using this instances private key and SHA256
         /// </summary>
