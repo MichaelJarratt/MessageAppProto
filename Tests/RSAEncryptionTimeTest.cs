@@ -140,7 +140,7 @@ namespace Tests
             CryptoUtility.setServiceProvider(localSet); //give local key set to utility
             Byte[] signatureBytes = CryptoUtility.signMessage(message); //creates signature for message with "local" key set
             CryptoUtility.setServiceProvider(remoteSet); //give remote key set to utility
-            Byte[] messageBytes = Encoding.UTF8.GetBytes(CryptoUtility.encryptData(message, CryptoUtility.getPublicKey())); //encrypts with remote public key of "recipient"
+            Byte[] messageBytes = Encoding.UTF8.GetBytes(CryptoUtility.RSAEncryptData(message, CryptoUtility.getPublicKey())); //encrypts with remote public key of "recipient"
             stopWatch.Stop();
             testResult.encryptionTime = (int)stopWatch.ElapsedMilliseconds;
             testResult.totalLength = signatureBytes.Length + messageBytes.Length;
@@ -150,7 +150,7 @@ namespace Tests
             stopWatch.Reset();
             stopWatch.Start();
             //decrypts message with "recipients" remote private key. CryptoUtility already has the remote keyset as it's service provider
-            String decMessage = CryptoUtility.decryptData(Encoding.UTF8.GetString(messageBytes), CryptoUtility.getPrivateKey());
+            String decMessage = CryptoUtility.RSADecryptData(Encoding.UTF8.GetString(messageBytes), CryptoUtility.getPrivateKey());
             CryptoUtility.setServiceProvider(localSet); //give it the "senders" public key
             bool validSig = CryptoUtility.validateSignature(Encoding.UTF8.GetBytes(message), signatureBytes, CryptoUtility.getPublicKey());
             stopWatch.Stop();

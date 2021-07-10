@@ -39,118 +39,53 @@ namespace MessageApp
             targetEndPoint = new IPEndPoint(IPAddress.Parse(targetIP), targetPort); //ip/port combo to send messages to
         }
 
-        // takes message object, stores refeence and has the message sent by sendMessage(string)
+        /// <summary>
+        /// This method should be called by the GUI version.
+        /// Takes a message object as a parameter and stores reference so that it's sending can be confirmed,
+        /// utilises NetworkUtility to exchange keys, then transmit the message.
+        /// Errors are caught and reported to the controller,
+        /// Successful sending of the message is reported to the controller by NetworkUtility directly.
+        /// </summary>
+        /// <param name="message">The message to send</param>
         public void sendMessage(Message message)
         {
-            currentMessage = message; //stores reference
+            currentMessage = message; //stores reference so successful sending can be reported to the controller
             sendMessage(message.message); //extracts message text and sends it
         }
 
-        //takes message as input, establishes connection to target and exchanged keys, then passes control over to transmit
-        //to create and send the transmission
+        /// <summary>
+        /// This method should only be externally called by the CLI version.
+        /// Takes a message as a parameter and utilises NetworkUtility to exchange keys, then transmit the message.
+        /// Errors are caught and reported to the controller,
+        /// Successful sending of the message is reported to the controller by NetworkUtility directly.
+        /// </summary>
+        /// <param name="message">The message to send</param>
         public void sendMessage(string message) //still public so that console version does not break
         {
             sendSocket = new Socket(IPAddress.Parse(targetIP).AddressFamily, SocketType.Stream, ProtocolType.Tcp); //create socket to handle sending
-            sendSocket.SendTimeout = 5000; //try for 5 seconds to get a connection
-            try
+            if (!NetworkUtility.connect(sendSocket, targetIP, targetPort)) //try to connect, returns bool
             {
-                sendSocket.Connect(targetEndPoint);
-                sendKey(sendSocket);
-                receiveKey();
-                transmit(message); //all synchronous and block while being done, the key exchange must be done first
+                controllerSendErrorReport(TransmissionErrorCode.CliNoEndPointConnection);
             }
-            catch(SocketException e)
+            else //successfully binded to endpoint
             {
-                if (e.ErrorCode == 10060) //times out, AKA no target to connect to
+                // send the client public RSA key to server as plaintext
+                NetworkUtility.PlainTextTransmit(sendSocket, Encoding.UTF8.GetBytes(CryptoUtility.getPublicKey()));
+                // receive the public RSA of the server as plaintext
+                byte[] bytes = NetworkUtility.PlainTextReceive(sendSocket);
+                string serverPubKey = Encoding.UTF8.GetString(bytes);
+
+                try
                 {
-                    controllerSendErrorReport(TransmissionErrorCode.CliNoEndPointConnection);
+                    //send it via NetworkUtility
+                    NetworkUtility.RSATransmit(sendSocket, Encoding.UTF8.GetBytes(message), serverPubKey, confirmSendSuccess);
                 }
-                else //some other kind of uncaught exception (not from transmit though, that catches its own errors)
+                catch (NetworkUtilityException e)
                 {
-                    controllerSendErrorReport(TransmissionErrorCode.CliKeyExchangeFail);
-                }
-            }
-
-        }
-
-        //get key from CryptoUtility and send it to paired application
-        private void sendKey(Socket sendSocket)
-        {
-            string publicKey = CryptoUtility.getPublicKey(); //gets keystring from utility class
-            sendSocket.Send(Encoding.UTF8.GetBytes(publicKey)); //converts key to UTF-8 Byte array and sends it synchronously
-            //Console.WriteLine("sent key: " + publicKey + "\n/end key\n\n");
-        }
-        //synchronously receives key from server
-        private void receiveKey()
-        {
-            Byte[] keyBytes = new Byte[1024]; //raw bytes received
-            int receivedBytes = sendSocket.Receive(keyBytes);
-
-            String key = Encoding.UTF8.GetString(keyBytes,0,receivedBytes); //only converts bytes that were received to get key
-
-            //Console.WriteLine("received key: " + key +"\n/end key\n\n");
-            receivedPublicKeyString = key;
-        }
-
-        //sends provided message to server
-        private void transmit(string message)
-        {
-            Byte[] signatureBytes = CryptoUtility.signMessage(message); //creates signature for message
-            Byte[] messageBytes = Encoding.UTF8.GetBytes(CryptoUtility.encryptData(message,receivedPublicKeyString)); //creates byte array for encrypted message
-
-            int totalLength = signatureBytes.Length + messageBytes.Length + 6; //length of signature, message, itself and signature and message lengths //also I know it's a magic number but this is a prototype, no point setting up constants class for only this
-            Byte[] totalLengthBytes = lengthIntToBytes(totalLength); //two bytes
-            Byte[] signatureLengthBytes = lengthIntToBytes(signatureBytes.Length); //two bytes
-            Byte[] messageLengthBytes = lengthIntToBytes(messageBytes.Length); //two bytes
-
-            //temporary - testing what happens when corruption occurs
-            //totalLengthBytes = lengthIntToBytes(1500);
-            //signatureLengthBytes = lengthIntToBytes(260); 
-            //messageLengthBytes = lengthIntToBytes(2000);
-            //signatureBytes[0] = 0; // 1 in 256 chance that [0] would actually be 0
-            //messageBytes[0] = 0;
-
-
-            //stick lengths, signature and message together
-            Byte[] transmissionBytes = new byte[totalLength]; //signature is always 253 bytes
-            Array.Copy(totalLengthBytes, transmissionBytes, 2); //first two bytes - copies the two bytes from total length into transmission bytes
-            Array.Copy(signatureLengthBytes, 0 , transmissionBytes, 2, 2); //bytes 3&4 (2&3)
-            Array.Copy(messageLengthBytes, 0 , transmissionBytes, 4, 2); //bytes 5&6 (4&5)
-            Array.Copy(signatureBytes,0 , transmissionBytes, 6, signatureBytes.Length); //starting after lengths, insert signature bytes (always 253)
-            Array.Copy(messageBytes, 0, transmissionBytes, 6+signatureBytes.Length, messageBytes.Length); //starting in position after signature bytes, add all message bytes
-
-            //Console.WriteLine("signature: " + System.Convert.ToBase64String(signatureBytes));
-
-            try
-            {
-                sendSocket.Send(transmissionBytes); //sends message synchronously
-            }
-            catch (SocketException e)
-            {
-                //this is the only "expected" exception
-                if (e.SocketErrorCode == SocketError.TimedOut)
-                {
-                    //Console.WriteLine("Could not connect to target");
-                    controllerSendErrorReport(TransmissionErrorCode.CliConnectionLost); //could not connect to target
-                }
-                else
-                {
-                    controllerSendErrorReport(TransmissionErrorCode.CliTransmissionError); //unspecified transmission error
+                    controllerSendErrorReport(e.errorCode); //extract TransmissionErrorCode and send it to controller
                 }
             }
-            //bytes have been sent, need confirmation they've been succesfully received and read
-            try
-            {
-                sendSocket.ReceiveTimeout = 2000; //waits up to two seconds for confirmation
-                int confirmationBytes = sendSocket.Receive(new byte[1024]); //don't care what is received, just that something is
 
-                confirmSendSuccess(); //reports successful sending to controller
-            }
-            catch (Exception) //server did not return confirmation
-            {
-
-                controllerSendErrorReport(TransmissionErrorCode.CliNoReceiveConfirmaton);
-            }
         }
 
         //returns currentMessage to controller and confirms that it was sent
@@ -171,13 +106,6 @@ namespace MessageApp
         public void setSendConfirmationCallback(Action<Message> newObj)
         {
             controllerSendConfirmation = newObj;
-        }
-
-        //takes int32 number, typecasts to int16, converts it to Byte[] with two elements and returns it
-        private Byte[] lengthIntToBytes(int length)
-        {
-            short shortLength = (short) length; //typecast to short (anything greater than 65,536 will either throw exception or loose precision
-            return BitConverter.GetBytes(shortLength);
         }
     }
 }

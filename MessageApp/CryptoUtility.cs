@@ -57,7 +57,6 @@ namespace MessageApp
             //get the object back from the stream
             return (RSAParameters)xs.Deserialize(sr);
         }
-
         //takes a message and a key and returns the message encrypted with the key
         /// <summary>
         /// RSA - Takes a string message and a key and returns the message encrypted with the key
@@ -65,31 +64,47 @@ namespace MessageApp
         /// <param name="message">string of message to be encrypted</param>
         /// <param name="key">key to encrypt message with</param>
         /// <returns>base64 encoded string representation of encrypted message</returns>
-        public static string encryptData(string message, string key)
+        public static string RSAEncryptData(string data, string key)
         {
-            Byte[] messageBytes = Encoding.UTF8.GetBytes(message);
-
+            Byte[] dataBytes = Encoding.UTF8.GetBytes(data);
+            return RSAEncryptData(dataBytes, key);
+        }
+        //takes a message and a key and returns the message encrypted with the key
+        /// <summary>
+        /// RSA - Takes a string message and a key and returns the message encrypted with the key
+        /// </summary>
+        /// <param name="message">string of message to be encrypted</param>
+        /// <param name="key">key to encrypt message with</param>
+        /// <returns>base64 encoded string representation of encrypted message</returns>
+        public static string RSAEncryptData(byte[] data, string key)
+        {
             RSACryptoServiceProvider encrypter = new RSACryptoServiceProvider(); //create instance that will do the encryption
             encrypter.ImportParameters(keyStringToRSAParam(key)); //converts the keystring to a key and sets it
-            messageBytes = encrypter.Encrypt(messageBytes, false);
+            data = encrypter.Encrypt(data, false);
 
             //String encryptedMessage = Encoding.UTF8.GetString(messageBytes);
-            string encryptedMessage = System.Convert.ToBase64String(messageBytes);
+            string encryptedMessage = System.Convert.ToBase64String(data);
             return encryptedMessage;
         }
 
         //takes an encrypted message and key and decrypts it
-        public static string decryptData(string message, string key)
+        public static string RSADecryptData(string data, string key)
+        {
+            Byte[] dataBytes = System.Convert.FromBase64String(data);
+            return RSADecryptData(dataBytes, key);
+        }
+        //takes an encrypted message and key and decrypts it
+        public static string RSADecryptData(byte[] data, string key)
         {
             //Byte[] messageBytes = Encoding.UTF8.GetBytes(message);
-            Byte[] messageBytes = System.Convert.FromBase64String(message);
+            
             //Byte[] keyBytes = rcsp.ExportRSAPrivateKey();
 
             RSACryptoServiceProvider decrypter = new RSACryptoServiceProvider(); //create instance that will do the decryption
             decrypter.ImportParameters(keyStringToRSAParam(key)); //converts the keystring to a key and sets it
-            messageBytes = decrypter.Decrypt(messageBytes, false);
+            data = decrypter.Decrypt(data, false);
 
-            String decryptedMessage = Encoding.UTF8.GetString(messageBytes); //turns bytes back into string
+            String decryptedMessage = Encoding.UTF8.GetString(data); //turns bytes back into string
             return decryptedMessage;
         }
 

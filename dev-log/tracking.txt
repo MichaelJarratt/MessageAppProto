@@ -1,0 +1,8 @@
+Testing password: hello - just keep using this for both machines
+
+handshake process:
+	client: sends public RSA key
+	server: received clients public key
+	server: returns servers public key
+	client: receives servers public key
+	client: generates AES key, encrypts it and sends it to server

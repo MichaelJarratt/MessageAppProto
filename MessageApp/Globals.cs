@@ -13,6 +13,8 @@ namespace MessageApp
         public const int AES_KEY_LENGTH = 128;
         public const string DB_NAME = "MessageAppDB"; //name of database file
 
+        public const int SEND_TIMEOUT = 5000; //message sending timeout, in milliseconds
+
 
         /// <summary>
         /// takes a password entered by the user and uses it as the seed to generate a symmetric key

@@ -61,8 +61,8 @@ namespace MessageApp
             Socket conListenerTemp = (Socket)ar.AsyncState; //gets the connectionListener socket from the listenLoop (although couldn't this be done via the field?)
             Socket receiveHandler = conListenerTemp.EndAccept(ar); //gets socket that will receive bytes
 
-            String keyString = receiveKey(receiveHandler); //block
-            sendKey(receiveHandler); //block .keys are exchanged syncrhonously (must be completed first), then continue receiving message
+            String keyString = receiveRSAKey(receiveHandler); //block
+            sendRSAKey(receiveHandler); //block .keys are exchanged syncrhonously (must be completed first), then continue receiving message
 
             BufferState bufferState = new BufferState(); //creates new bit buffer for receiving socket
             bufferState.socket = receiveHandler; //places socket this buffer is for inside so it can be passed in the IAsyncResult
@@ -136,7 +136,7 @@ namespace MessageApp
             Byte[] messageBytes = new ArraySegment<Byte>(bufferState.bytes, 6 + bufferState.signatureLength, bufferState.messageLength).ToArray();
 
             //decrypt message with private key and get its string
-            string messageString = CryptoUtility.decryptData(Encoding.UTF8.GetString(messageBytes), CryptoUtility.getPrivateKey());
+            string messageString = CryptoUtility.RSADecryptData(Encoding.UTF8.GetString(messageBytes), CryptoUtility.getPrivateKey());
 
             //validate signature (inspect validateSignature to see how)
             bool validSignature = CryptoUtility.validateSignature(Encoding.UTF8.GetBytes(messageString), signatureBytes, bufferState.keyString);
@@ -164,7 +164,7 @@ namespace MessageApp
         }
 
         // synchronously accepts the public key of the client
-        private string receiveKey(Socket receiveHandler)
+        private string receiveRSAKey(Socket receiveHandler)
         {
             Byte[] keyBytes = new Byte[1024]; //raw bytes received
             int receivedBytes = receiveHandler.Receive(keyBytes);
@@ -176,7 +176,7 @@ namespace MessageApp
 
         }
         // gets the public key and sends it synchronously
-        private void sendKey(Socket receiveHandler)
+        private void sendRSAKey(Socket receiveHandler)
         {
             //string key = "server key";
             string publicKey = CryptoUtility.getPublicKey(); //gets keystring from utility class
