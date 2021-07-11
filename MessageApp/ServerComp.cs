@@ -61,13 +61,20 @@ namespace MessageApp
             Socket conListenerTemp = (Socket)ar.AsyncState; //gets the connectionListener socket from the listenLoop (although couldn't this be done via the field?)
             Socket receiveHandler = conListenerTemp.EndAccept(ar); //gets socket that will receive bytes
 
-            String keyString = receiveRSAKey(receiveHandler); //block
-            sendRSAKey(receiveHandler); //block .keys are exchanged syncrhonously (must be completed first), then continue receiving message
+            // receive the client public RSA key as plaintext
+            byte[] bytes = NetworkUtility.PlainTextReceive(receiveHandler); 
+            String clientPubKey = Encoding.UTF8.GetString(bytes);
+            // send the server public RSA key to client as plaintext
+            NetworkUtility.PlainTextTransmit(receiveHandler, Encoding.UTF8.GetBytes(CryptoUtility.getPublicKey()));
 
-            BufferState bufferState = new BufferState(); //creates new bit buffer for receiving socket
-            bufferState.socket = receiveHandler; //places socket this buffer is for inside so it can be passed in the IAsyncResult
-            bufferState.keyString = keyString; //stores senders public key in bufferState
-            receiveHandler.BeginReceive(bufferState.bytes, 0, BufferState.bufferSize, SocketFlags.None, new AsyncCallback(receiveBytes), bufferState); //stores received bytes in bufferState.bytes
+            //asynchronously receive transmission. data is sent to completeReceive via callback.
+            NetworkUtility.RSAreceive(receiveHandler, clientPubKey, asyncReceiveCallback);
+
+            
+            //BufferState bufferState = new BufferState(); //creates new bit buffer for receiving socket
+            //bufferState.socket = receiveHandler; //places socket this buffer is for inside so it can be passed in the IAsyncResult
+            //bufferState.keyString = keyString; //stores senders public key in bufferState
+            //receiveHandler.BeginReceive(bufferState.bytes, 0, BufferState.bufferSize, SocketFlags.None, new AsyncCallback(receiveBytes), bufferState); //stores received bytes in bufferState.bytes
         }
 
         //  THREAD  //
@@ -124,12 +131,32 @@ namespace MessageApp
             }
         }
 
+        /// <summary>
+        /// Called by NetworkUtility when an asynchronous transmission has been received
+        /// </summary>
+        /// <param name="bufferState"></param>
+        public void asyncReceiveCallback(BufferState bufferState)
+        {
+            try
+            {
+                completeReceive(bufferState); //pass everything off to complete receive for parsing and validation
+            }
+            catch (Exception e)
+            {
+                reportReceiveError(TransmissionErrorCode.ServDecOrValError); //errors decrypting or validating
+            }
+        }
+
         //callback called by receiveBytes.
         //will extract the signature and encrypted message from the transmission bytes.
         //decrypts message using received public key of sender.
         //validates the signature.
         private void completeReceive(BufferState bufferState)
         {
+            //extract signature length and message length
+            bufferState.signatureLength = NetworkUtility.lengthBytesToInt(new ArraySegment<Byte>(bufferState.bytes, 2, 2).ToArray());
+            bufferState.messageLength = NetworkUtility.lengthBytesToInt(new ArraySegment<Byte>(bufferState.bytes, 4, 2).ToArray());
+
             //get signature bytes from bufferState
             Byte[] signatureBytes = new ArraySegment<Byte>(bufferState.bytes, 6, bufferState.signatureLength).ToArray();
             //get encrypted message bytes from bufferState
@@ -216,5 +243,7 @@ namespace MessageApp
         public int totalLength = 0; //holds total length of transmission
         public int signatureLength = 0; //length of signature
         public int messageLength = 0; //holds length of encrypted message
+
+        public Action<BufferState> callback = null; //the callback used by the receive method when all the data has been received
     }
 }

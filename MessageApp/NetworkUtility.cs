@@ -138,10 +138,62 @@ namespace MessageApp
 
         }
 
-        //public static byte[] RSAReceive()
-        //{
+        /// <summary>
+        /// Performs asynchronous receive and passes the BufferState object back to the provided callback.
+        /// </summary>
+        /// <param name="socket">The socket to receive the transmission</param>
+        /// <param name="receivedKey">The public RSA key of the transmission sender</param>
+        /// <param name="callback">The callback to return the data to</param>
+        public static void RSAreceive(Socket socket, string receivedKey, Action<BufferState> callback)
+        {
+            // transState shorthand for TransmissionState. it's the object that maintains the state of the transmission between asynchronous method calls
+            BufferState transState = new BufferState();
+            transState.socket = socket;
+            transState.keyString = receivedKey;
+            transState.callback = callback;
 
-        //}
+            socket.BeginReceive(transState.bytes, 0, BufferState.bufferSize, SocketFlags.None, new AsyncCallback(AsyncReceiveBytes), transState);
+        }
+
+
+        private static void AsyncReceiveBytes(IAsyncResult ar)
+        {
+            BufferState transState = (BufferState) ar.AsyncState; //extracts transmission state from AsyncResult
+            Socket socket = transState.socket;
+
+            int bytesReceived = socket.EndReceive(ar); //bytesReceived is the number of bytes received this round
+            transState.totalBytesReceived = transState.totalBytesReceived + bytesReceived; //self explanatory
+
+            if (bytesReceived > 0) //if anything was received this round
+            {
+                //if the first two bits have been received and total length has not been extracted yet
+                if (transState.totalLength == 0 && transState.totalBytesReceived >= 2) 
+                {   // extract totalLength
+                    transState.totalLength = lengthBytesToInt(new ArraySegment<Byte>(transState.bytes, 0, 2).ToArray()); //creates array containg first two bits of transmission and converts them to int (total length) 
+                }
+
+                if (transState.totalBytesReceived < transState.totalLength) //if not every byte has been received
+                {
+                    //start another round
+                    socket.BeginReceive(transState.bytes, 0, BufferState.bufferSize, SocketFlags.None, new AsyncCallback(AsyncReceiveBytes), transState);
+                }
+                else if (transState.totalLength == transState.totalBytesReceived) //every byte has been received
+                {
+                    //pass the transState containing the transmission information back via the callback
+                    transState.callback(transState);
+                }
+                else if (transState.totalLength != transState.totalBytesReceived) //transmission error (total length too short)
+                {
+                    throw new NetworkUtilityException(TransmissionErrorCode.ServTotalLengthError); //total length error
+                }
+            }
+            else //if no bytes were received, then a transmission error probably ocurred (total length longer than real length)
+            {
+                throw new NetworkUtilityException(TransmissionErrorCode.ServTotalLengthError); //total length error
+            }
+        }
+
+        
 
         public static void AESTransmit()
         {
@@ -158,10 +210,20 @@ namespace MessageApp
         /// </summary>
         /// <param name="length">int32 representation of number of bytes</param>
         /// <returns>Byte[] representing an int 16 with two elements</returns>
-        private static Byte[] lengthIntToBytes(int length)
+        public static Byte[] lengthIntToBytes(int length)
         {
             short shortLength = (short)length; //typecast to short (anything greater than 65,536 will either throw exception or lose precision)
             return BitConverter.GetBytes(shortLength);
+        }
+
+        /// <summary>
+        /// Takes an array of two bytes, representing a short, and converts it to an integer.
+        /// </summary>
+        /// <param name="bytes">Byte[2] representing the short</param>
+        /// <returns>Integer conversion of the short</returns>
+        public static int lengthBytesToInt(Byte[] bytes)
+        {
+            return (int)BitConverter.ToInt16(bytes); //convert two bytes to a short then typecast to int
         }
     }
 }
