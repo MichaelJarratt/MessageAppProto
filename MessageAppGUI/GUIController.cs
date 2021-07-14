@@ -27,6 +27,7 @@ namespace MessageAppGUI
         private delegate void MAFDisplayContactsDelegate(List<Contact> contacts);
         private delegate void MAFDisplayMessageDelegate(Message message);
         private delegate void MAFDisplayMessagesDelegate(List<Message> messags);
+        private delegate void MAFConfirmMessageSentDelegate();
 
         /// <summary>
         /// Creates and stored contact with the provided information
@@ -64,6 +65,12 @@ namespace MessageAppGUI
         {
             Delegate del = new MAFDisplayMessagesDelegate(messageAppForm.displayMessages);
             messageAppForm.Invoke(del, messages);
+        }
+        //informs the GUI that the message was sent and can be cleared from the text box
+        private void confirmSendSuccess()
+        {
+            Delegate del = new MAFConfirmMessageSentDelegate(messageAppForm.messageSentConfirmed);
+            messageAppForm.Invoke(del);
         }
 
         //loads messages exchanged with <contactID> and creates clientComponent with their IP address as the target
@@ -147,7 +154,7 @@ namespace MessageAppGUI
         public void messageSentCallback(Message message)
         {
             messageManager.commitMessage(message); //commit to database
-            messageAppForm.messageSentConfirmed(); //tells form to clear the input box
+            confirmSendSuccess(); //tells form to clear the input box
             displayMessage(message); //show the message
         }
         //callback for when contact manager has to create a new contact for a previously unknown IP address

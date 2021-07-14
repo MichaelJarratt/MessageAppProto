@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Net;
 using System.Net.Sockets;
+using System.Threading.Tasks;
 
 namespace MessageApp
 {
@@ -19,6 +20,8 @@ namespace MessageApp
         /// Returns a bool for the success of the operation.
         /// </summary>
         /// <param name="socket">The socket to connect to its endpoint</param>
+        /// <param name="targetIP">The IP address to connect to</param>
+        /// <param name="targetPort">The port to connect to</param>
         /// <returns>Bool if the socket has connected</returns>
         public static bool connect(Socket socket, string targetIP, int targetPort)
         {
@@ -45,6 +48,61 @@ namespace MessageApp
             socket.SendTimeout= timeout;
             return connect(socket, targetIP, targetPort);
         }
+
+        /// <summary>
+        /// Takes a socket, target IP and port (endpoint) and asynchronously creates a connection to the endpoint.
+        /// Returns the socket to the callback when successful, or throws an exception if not.
+        /// </summary>
+        /// <param name="socket">Socket to asynchronously connect to it's endpoint</param>
+        /// <param name="targetIP">The IP address to connect to</param>
+        /// <param name="targetPort">The port to connect to</param>
+        /// <param name="callback">Callback to return the connected socket to</param>
+        public static void connectAsync(Socket socket, string targetIP, int targetPort, Action<Socket> callback)
+        {
+            ConnectionState conState = new ConnectionState(); //maintains the state of the connection.
+            conState.socket = socket;
+            conState.callback = callback;
+
+            IPEndPoint endPoint = new IPEndPoint(IPAddress.Parse(targetIP), targetPort);
+            try
+            { 
+                socket.BeginConnect(endPoint, new AsyncCallback(endConnectAsync), conState);
+            }
+            catch (Exception e)
+            {
+                throw new NetworkUtilityException(TransmissionErrorCode.CliNoEndPointConnection);
+            }
+        }
+
+        /// <summary>
+        /// Finishes the connection and uses the callback to return the connected socket to the invoker.
+        /// Returns null of connection failed.
+        /// </summary>
+        /// <param name="ar">Stabe object from BeginConnect</param>
+        private static void endConnectAsync(IAsyncResult ar)
+        {
+            ConnectionState conState = (ConnectionState)ar.AsyncState;
+            Socket socket = conState.socket;
+
+            try
+            {
+                socket.EndConnect(ar);
+                conState.callback(socket); //return connected socket to invoker.
+            }
+            catch (Exception)
+            {
+                conState.callback(null);
+                //this is in a new thread so it is not thrown to the invoking client
+                //throw new NetworkUtilityException(TransmissionErrorCode.CliNoEndPointConnection);
+            }
+        }
+
+        public static async Task<Socket> connectTask(Socket socket, string targetIP, int targetPort)
+        {
+            await Task.Factory.FromAsync(socket.BeginConnect, socket.EndConnect, IPAddress.Parse(targetIP), targetPort, null);
+            return socket;
+        }
+
 
         /// <summary>
         /// Takes a socket and data and transmits the data synchronously to the endpoint.
@@ -142,20 +200,19 @@ namespace MessageApp
         /// Performs asynchronous receive and passes the BufferState object back to the provided callback.
         /// </summary>
         /// <param name="socket">The socket to receive the transmission</param>
-        /// <param name="receivedKey">The public RSA key of the transmission sender</param>
-        /// <param name="callback">The callback to return the data to</param>
-        public static void RSAreceive(Socket socket, string receivedKey, Action<BufferState> callback)
+        /// <param name="transState">BufferState object for the transmission</param>
+        public static void AsyncReceive(Socket socket, BufferState transState)
         {
             // transState shorthand for TransmissionState. it's the object that maintains the state of the transmission between asynchronous method calls
-            BufferState transState = new BufferState();
             transState.socket = socket;
-            transState.keyString = receivedKey;
-            transState.callback = callback;
 
             socket.BeginReceive(transState.bytes, 0, BufferState.bufferSize, SocketFlags.None, new AsyncCallback(AsyncReceiveBytes), transState);
         }
 
-
+        /// <summary>
+        /// Asynchronously receives bytes and uses the callback in the BufferState to return the data to the invoker.
+        /// </summary>
+        /// <param name="ar">Asynchronous state object</param>
         private static void AsyncReceiveBytes(IAsyncResult ar)
         {
             BufferState transState = (BufferState) ar.AsyncState; //extracts transmission state from AsyncResult
@@ -193,7 +250,10 @@ namespace MessageApp
             }
         }
 
-        
+        public static void asyncTransmit(Socket socket, BufferState transState, Action successCallback, Action<TransmissionErrorCode> exceptionCallback)
+        {
+            //socket.begin
+        }
 
         public static void AESTransmit()
         {

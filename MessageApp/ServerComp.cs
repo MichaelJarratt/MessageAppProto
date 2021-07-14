@@ -67,8 +67,14 @@ namespace MessageApp
             // send the server public RSA key to client as plaintext
             NetworkUtility.PlainTextTransmit(receiveHandler, Encoding.UTF8.GetBytes(CryptoUtility.getPublicKey()));
 
+            //set up transmission state object, will be passed back after asynchronous receive
+            BufferState transmissionState = new BufferState();
+            transmissionState.cryptographyType = CryptographyType.RSA; //RSA encrypted transmission
+            transmissionState.keyString = clientPubKey;
+            transmissionState.callback = asyncReceiveCallback;
+
             //asynchronously receive transmission. data is sent to completeReceive via callback.
-            NetworkUtility.RSAreceive(receiveHandler, clientPubKey, asyncReceiveCallback);
+            NetworkUtility.AsyncReceive(receiveHandler, transmissionState);
 
             
             //BufferState bufferState = new BufferState(); //creates new bit buffer for receiving socket
@@ -132,18 +138,31 @@ namespace MessageApp
         }
 
         /// <summary>
-        /// Called by NetworkUtility when an asynchronous transmission has been received
+        /// Called by NetworkUtility when an asynchronous transmission has been received.
+        /// Identifies what Cryptography type a transmission was and passes it to the appropriate method.
         /// </summary>
         /// <param name="bufferState"></param>
         public void asyncReceiveCallback(BufferState bufferState)
         {
-            try
+            CryptographyType cType = bufferState.cryptographyType; //determine type of transmission
+            switch (cType)
             {
-                completeReceive(bufferState); //pass everything off to complete receive for parsing and validation
-            }
-            catch (Exception e)
-            {
-                reportReceiveError(TransmissionErrorCode.ServDecOrValError); //errors decrypting or validating
+                case CryptographyType.PTX: //plaintext
+                    break;
+                case CryptographyType.AES:
+                    break;
+                case CryptographyType.RSA:
+                    try
+                    {
+                        completeReceive(bufferState); //pass everything off to complete receive for parsing and validation
+                    }
+                    catch (Exception e)
+                    {
+                        reportReceiveError(TransmissionErrorCode.ServDecOrValError); //errors decrypting or validating
+                    }
+                    break;
+                default:
+                    throw new Exception("Transmission Cryptography type not set");
             }
         }
 
@@ -245,5 +264,12 @@ namespace MessageApp
         public int messageLength = 0; //holds length of encrypted message
 
         public Action<BufferState> callback = null; //the callback used by the receive method when all the data has been received
+        public CryptographyType cryptographyType;
+    }
+
+    public class ConnectionState
+    {
+        public Socket socket = null; //the socket forming a connection
+        public Action<Socket> callback = null; //the callback used to return a socket that has been asynchronously connected
     }
 }

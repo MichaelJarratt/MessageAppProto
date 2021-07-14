@@ -4,6 +4,7 @@ using System.Text;
 using System.Net;
 using System.Threading;
 using System.Net.Sockets;
+using System.Threading.Tasks;
 
 namespace MessageApp
 {
@@ -50,7 +51,7 @@ namespace MessageApp
         public void sendMessage(Message message)
         {
             currentMessage = message; //stores reference so successful sending can be reported to the controller
-            sendMessage(message.message); //extracts message text and sends it
+            sendMessagesync(message.message); //extracts message text and sends it
         }
 
         /// <summary>
@@ -60,10 +61,24 @@ namespace MessageApp
         /// Successful sending of the message is reported to the controller by NetworkUtility directly.
         /// </summary>
         /// <param name="message">The message to send</param>
-        public void sendMessage(string message) //still public so that console version does not break
+        public async void sendMessagesync(string message) //still public so that console version does not break
         {
             sendSocket = new Socket(IPAddress.Parse(targetIP).AddressFamily, SocketType.Stream, ProtocolType.Tcp); //create socket to handle sending
-            if (!NetworkUtility.connect(sendSocket, targetIP, targetPort)) //try to connect, returns bool
+            //if (!NetworkUtility.connect(sendSocket, targetIP, targetPort)) //try to connect, returns bool
+            //{
+            //    controllerSendErrorReport(TransmissionErrorCode.CliNoEndPointConnection);
+            //}
+            Task<Socket> connectionTask = NetworkUtility.connectTask(sendSocket, targetIP, targetPort);
+
+            try
+            {
+                sendSocket = await connectionTask;
+            }
+            catch (Exception)
+            {
+            }
+
+            if ( connectionTask.IsFaulted) 
             {
                 controllerSendErrorReport(TransmissionErrorCode.CliNoEndPointConnection);
             }
@@ -86,6 +101,47 @@ namespace MessageApp
                 }
             }
 
+        }
+
+        public void sendMessage(string message) //still public so that console version does not break
+        {
+            sendSocket = new Socket(IPAddress.Parse(targetIP).AddressFamily, SocketType.Stream, ProtocolType.Tcp); //create socket to handle sending
+            try
+            {
+                NetworkUtility.connectAsync(sendSocket, targetIP, targetPort, finishConnect);
+            }
+            catch (NetworkUtilityException e)
+            {
+                controllerSendErrorReport(e.errorCode);
+            }
+        }
+
+        //called after asyncConnect
+        public void finishConnect(Socket socket)
+        {
+            if (socket == null)
+            {
+                controllerSendErrorReport(TransmissionErrorCode.CliNoEndPointConnection);
+            }
+            else
+            {
+
+                // send the client public RSA key to server as plaintext
+                NetworkUtility.PlainTextTransmit(socket, Encoding.UTF8.GetBytes(CryptoUtility.getPublicKey()));
+                // receive the public RSA of the server as plaintext
+                byte[] bytes = NetworkUtility.PlainTextReceive(socket);
+                string serverPubKey = Encoding.UTF8.GetString(bytes);
+
+                try
+                {
+                    //send it via NetworkUtility
+                    NetworkUtility.RSATransmit(socket, Encoding.UTF8.GetBytes(currentMessage.message), serverPubKey, confirmSendSuccess);
+                }
+                catch (NetworkUtilityException e)
+                {
+                    controllerSendErrorReport(e.errorCode); //extract TransmissionErrorCode and send it to controller
+                }
+            }
         }
 
         //returns currentMessage to controller and confirms that it was sent
