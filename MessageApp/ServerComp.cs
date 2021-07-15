@@ -54,7 +54,7 @@ namespace MessageApp
         // THREAD //
         //started when connectionListener gets a request
         //handles creating a receiving socket and then terminates
-        private void acceptTCPRequest(IAsyncResult ar)
+        private async void acceptTCPRequest(IAsyncResult ar)
         {
             connectionListener.BeginAccept(new AsyncCallback(acceptTCPRequest), connectionListener); //immediately tells connectionListener to begin listening again
 
@@ -62,10 +62,10 @@ namespace MessageApp
             Socket receiveHandler = conListenerTemp.EndAccept(ar); //gets socket that will receive bytes
 
             // receive the client public RSA key as plaintext
-            byte[] bytes = NetworkUtility.PlainTextReceive(receiveHandler); 
+            byte[] bytes = NetworkUtility.receiveSync(receiveHandler); 
             String clientPubKey = Encoding.UTF8.GetString(bytes);
             // send the server public RSA key to client as plaintext
-            NetworkUtility.PlainTextTransmit(receiveHandler, Encoding.UTF8.GetBytes(CryptoUtility.getPublicKey()));
+            NetworkUtility.transmitSync(receiveHandler, Encoding.UTF8.GetBytes(CryptoUtility.getPublicKey()));
 
             //set up transmission state object, will be passed back after asynchronous receive
             BufferState transmissionState = new BufferState();
@@ -74,13 +74,54 @@ namespace MessageApp
             transmissionState.callback = asyncReceiveCallback;
 
             //asynchronously receive transmission. data is sent to completeReceive via callback.
-            NetworkUtility.AsyncReceive(receiveHandler, transmissionState);
+            //NetworkUtility.AsyncReceive(receiveHandler, transmissionState);
+            TransmissionState transState = new TransmissionState();
+            transState.socket = receiveHandler;
+            transState.keyString = clientPubKey;
+            Task<TransmissionState> receiveTask = NetworkUtility.receiveAsync(transState);
+
+            transState = await receiveTask;
+            Console.WriteLine("Received bytes: "+ transState.totalBytesReceived);
+            Console.WriteLine(transState.bytes[0] + " " + transState.bytes[1201]); //transState.bytes.Length-1]);
+            completeReceive2(transState);
 
             
             //BufferState bufferState = new BufferState(); //creates new bit buffer for receiving socket
             //bufferState.socket = receiveHandler; //places socket this buffer is for inside so it can be passed in the IAsyncResult
             //bufferState.keyString = keyString; //stores senders public key in bufferState
             //receiveHandler.BeginReceive(bufferState.bytes, 0, BufferState.bufferSize, SocketFlags.None, new AsyncCallback(receiveBytes), bufferState); //stores received bytes in bufferState.bytes
+        }
+
+        private void completeReceive2(TransmissionState bufferState)
+        {
+            //extract signature length and message length
+            bufferState.signatureLength = NetworkUtility.lengthBytesToInt(new ArraySegment<Byte>(bufferState.bytes, 2, 2).ToArray());
+            bufferState.messageLength = NetworkUtility.lengthBytesToInt(new ArraySegment<Byte>(bufferState.bytes, 4, 2).ToArray());
+
+            //get signature bytes from bufferState
+            Byte[] signatureBytes = new ArraySegment<Byte>(bufferState.bytes, 6, bufferState.signatureLength).ToArray();
+            //get encrypted message bytes from bufferState
+            Byte[] messageBytes = new ArraySegment<Byte>(bufferState.bytes, 6 + bufferState.signatureLength, bufferState.messageLength).ToArray();
+
+            //decrypt message with private key and get its string
+            string messageString = CryptoUtility.RSADecryptData(Encoding.UTF8.GetString(messageBytes), CryptoUtility.getPrivateKey());
+
+            //validate signature (inspect validateSignature to see how)
+            bool validSignature = CryptoUtility.validateSignature(Encoding.UTF8.GetBytes(messageString), signatureBytes, bufferState.keyString);
+
+            if (validSignature)
+            {
+                bufferState.socket.Send(Encoding.UTF8.GetBytes("received")); //send confirmation of successful receive
+                string senderIP = ((System.Net.IPEndPoint)bufferState.socket.RemoteEndPoint).Address.ToString(); //pretty dumb, have to cast socket.remoteEndPoint to IPEndPoint to access the Address attribute 
+
+                Message message = new Message(messageString, senderIP); //creates message object with content and IP of the sender
+                controllerReturn(message);
+            }
+            else //signature invalid
+            {
+                reportReceiveError(TransmissionErrorCode.ServValidationFail); //report signature failed to validate
+            }
+
         }
 
         //  THREAD  //

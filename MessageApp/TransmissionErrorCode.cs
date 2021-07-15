@@ -12,10 +12,12 @@ namespace MessageApp
         CliConnectionLost,          //no connection when transmitting bytes
         CliTransmissionError,       //unspecified exeption caught during transmission
         CliNoReceiveConfirmaton,    //did not get confirmation of successful receive from server
+        CliUnspecifiedError,
 
         //ServerComp errors
         ServTotalLengthError,       //the total length attribute of the transmission was incorrect
         ServDecOrValError,          //exception when trying to decrypt message or validate signature
         ServValidationFail,         //signature failed to validate
+        ServUnspecifiedError,
     }
 }

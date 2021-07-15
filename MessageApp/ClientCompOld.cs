@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace MessageApp
 {
-    public class ClientComp
+    public class ClientCompOld
     {
         private int targetPort;
         private string targetIP;
@@ -21,13 +21,13 @@ namespace MessageApp
         private Action<Message> controllerSendConfirmation; //calling this method confirms that the message was sent succesfully
         private Message currentMessage; //reference to currently used Message object
 
-        public ClientComp(string targetIP)
+        public ClientCompOld(string targetIP)
         {
             this.targetIP = targetIP;
             targetPort = 65432;
             init();
         }
-        public ClientComp(string targetIP, int targetPort)
+        public ClientCompOld(string targetIP, int targetPort)
         {
             this.targetIP = targetIP;
             this.targetPort = targetPort;
@@ -38,19 +38,6 @@ namespace MessageApp
         private void init()
         {
             targetEndPoint = new IPEndPoint(IPAddress.Parse(targetIP), targetPort); //ip/port combo to send messages to
-        }
-
-        public void sendMessage(string message) //still public so that console version does not break
-        {
-            //sendSocket = new Socket(IPAddress.Parse(targetIP).AddressFamily, SocketType.Stream, ProtocolType.Tcp); //create socket to handle sending
-            //try
-            //{
-            //    NetworkUtility.connectAsync(sendSocket, targetIP, targetPort, finishConnect);
-            //}
-            //catch (NetworkUtilityException e)
-            //{
-            //    controllerSendErrorReport(e.errorCode);
-            //}
         }
 
         /// <summary>
@@ -64,46 +51,7 @@ namespace MessageApp
         public void sendMessage(Message message)
         {
             currentMessage = message; //stores reference so successful sending can be reported to the controller
-            sendMessageAsync(message.message); //extracts message text and sends it
-        }
-
-        /// <summary>
-        /// Takes a message as a parameter and utilises NetworkUtility to exchange keys, then asynchronously transmit the message.
-        /// Errors are caught and reported to the controller,
-        /// Successful sending of the message is reported to the controller by NetworkUtility directly.
-        /// </summary>
-        /// <param name="message">The message to send</param>
-        private async void sendMessageAsync(string message)
-        {
-            sendSocket = new Socket(IPAddress.Parse(targetIP).AddressFamily, SocketType.Stream, ProtocolType.Tcp); //create socket to handle sending
-            Task<Socket> connectTask = NetworkUtility.connectAsync(sendSocket, targetIP, targetPort);
-
-            try
-            {
-                sendSocket = await connectTask;
-                // send the client public RSA key to server as plaintext
-                NetworkUtility.transmitSync(sendSocket, Encoding.UTF8.GetBytes(CryptoUtility.getPublicKey()));
-                // receive the public RSA of the server as plaintext
-                byte[] bytes = NetworkUtility.receiveSync(sendSocket);
-                string serverPubKey = Encoding.UTF8.GetString(bytes);
-
-                try
-                {
-                    //async version
-                    NetworkUtility.RSATransmit2(sendSocket, Encoding.UTF8.GetBytes(message), serverPubKey, confirmSendSuccess);
-
-                    //send it via NetworkUtility
-                    //NetworkUtility.RSATransmit(sendSocket, Encoding.UTF8.GetBytes(message), serverPubKey, confirmSendSuccess);
-                }
-                catch (NetworkUtilityException e)
-                {
-                    controllerSendErrorReport(e.errorCode); //extract TransmissionErrorCode and send it to controller
-                }
-            }
-            catch(NetworkUtilityException e) //failure to connect to endpoint
-            {
-                controllerSendErrorReport(e.errorCode);
-            }
+            sendMessagesync(message.message); //extracts message text and sends it
         }
 
         /// <summary>
@@ -116,7 +64,21 @@ namespace MessageApp
         public async void sendMessagesync(string message) //still public so that console version does not break
         {
             sendSocket = new Socket(IPAddress.Parse(targetIP).AddressFamily, SocketType.Stream, ProtocolType.Tcp); //create socket to handle sending
-            if (!NetworkUtility.connectSync(sendSocket, targetIP, targetPort)) //try to connect, returns bool
+            //if (!NetworkUtility.connect(sendSocket, targetIP, targetPort)) //try to connect, returns bool
+            //{
+            //    controllerSendErrorReport(TransmissionErrorCode.CliNoEndPointConnection);
+            //}
+            Task<Socket> connectionTask = NetworkUtility.connectAsync(sendSocket, targetIP, targetPort);
+
+            try
+            {
+                sendSocket = await connectionTask;
+            }
+            catch (Exception)
+            {
+            }
+
+            if (connectionTask.IsFaulted)
             {
                 controllerSendErrorReport(TransmissionErrorCode.CliNoEndPointConnection);
             }
@@ -130,11 +92,8 @@ namespace MessageApp
 
                 try
                 {
-                    //async version
-                    NetworkUtility.RSATransmit2(sendSocket, Encoding.UTF8.GetBytes(message), serverPubKey, confirmSendSuccess);
-
                     //send it via NetworkUtility
-                    //NetworkUtility.RSATransmit(sendSocket, Encoding.UTF8.GetBytes(message), serverPubKey, confirmSendSuccess);
+                    NetworkUtility.RSATransmit(sendSocket, Encoding.UTF8.GetBytes(message), serverPubKey, confirmSendSuccess);
                 }
                 catch (NetworkUtilityException e)
                 {
@@ -144,9 +103,33 @@ namespace MessageApp
 
         }
 
-        
+        //called after asyncConnect
+        public void finishConnect(Socket socket)
+        {
+            if (socket == null)
+            {
+                controllerSendErrorReport(TransmissionErrorCode.CliNoEndPointConnection);
+            }
+            else
+            {
 
-        
+                // send the client public RSA key to server as plaintext
+                NetworkUtility.transmitSync(socket, Encoding.UTF8.GetBytes(CryptoUtility.getPublicKey()));
+                // receive the public RSA of the server as plaintext
+                byte[] bytes = NetworkUtility.receiveSync(socket);
+                string serverPubKey = Encoding.UTF8.GetString(bytes);
+
+                try
+                {
+                    //send it via NetworkUtility
+                    NetworkUtility.RSATransmit(socket, Encoding.UTF8.GetBytes(currentMessage.message), serverPubKey, confirmSendSuccess);
+                }
+                catch (NetworkUtilityException e)
+                {
+                    controllerSendErrorReport(e.errorCode); //extract TransmissionErrorCode and send it to controller
+                }
+            }
+        }
 
         //returns currentMessage to controller and confirms that it was sent
         private void confirmSendSuccess()
