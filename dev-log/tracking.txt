@@ -1,5 +1,15 @@
 Testing password: hello - just keep using this for both machines
 
+Client confirms a message has been sent and commits it to storage by returning a message object to the controller.
+Need to adapt it so that the message object is stored in TransmissionState and pulled out and returned to controller.
+
+Transmission format needs a place to put a cryptography type code (plaintext, RSA, AES)
+ - code should be inserted into transmission format by TransmissionFormatter.
+  - when received the whole byte[] should be passes, where it inspects it and returns the enum for the cryptography type.
+   - server then uses the enum to pass the data to the right TransmissionFormatter method for decoding
+
+may want to implement methods with timeouts. they can start the socket and a timer, when the timer runs out it closes the socket. (Timer class)
+
 async receive takes a bufferstate object.
 async receive sets up what it can, but some stuff needs to be defined by the server.
 e.g.: bufferstate has a field for plaintext, AES or RSA (enum?), the callback uses this to determine what to do with it

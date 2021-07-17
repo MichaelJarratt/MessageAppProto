@@ -21,5 +21,7 @@ namespace MessageApp
 
         public Action<BufferState> callback = null; //the callback used by the receive method when all the data has been received
         public CryptographyType cryptographyType;
+
+        public Message message; //message object being sent
     }
 }

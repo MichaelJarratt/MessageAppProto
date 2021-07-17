@@ -89,13 +89,31 @@ namespace MessageApp
 
                 try
                 {
-                    //async version
-                    NetworkUtility.RSATransmit2(sendSocket, Encoding.UTF8.GetBytes(message), serverPubKey, confirmSendSuccess);
+                    //encode transmission format
+                    byte[] transmissionBytes = TransmissionFormatter.encodeRSATransmission(Encoding.UTF8.GetBytes(message), serverPubKey);
 
-                    //send it via NetworkUtility
-                    //NetworkUtility.RSATransmit(sendSocket, Encoding.UTF8.GetBytes(message), serverPubKey, confirmSendSuccess);
+                    //create TransmissionState object and fill with needed items
+                    TransmissionState transState = new TransmissionState();
+                    transState.cryptographyType = CryptographyType.RSA;
+                    transState.socket = sendSocket;
+                    transState.bytes = transmissionBytes; //bytes to be transmitted
+
+                    Task<TransmissionState> transmissionTask = NetworkUtility.transmitAsync(transState); //begin async send task
+                    transState = await transmissionTask;
+
+                    try
+                    {
+                        //need to receive some data (doesn't matter what) as confirmation that server succesfully received and validated transmission
+                        Task<TransmissionState> receiveConfirmationTask = NetworkUtility.receiveAsync(transState); //can reuse state object
+                        transState = await receiveConfirmationTask; //if it does not time out
+                        confirmSendSuccess();
+                    }
+                    catch (NetworkUtilityException e) //server did not send receive confirmation
+                    {
+                        controllerSendErrorReport(TransmissionErrorCode.CliNoReceiveConfirmaton);
+                    }
                 }
-                catch (NetworkUtilityException e)
+                catch (NetworkUtilityException e) //error transmitting
                 {
                     controllerSendErrorReport(e.errorCode); //extract TransmissionErrorCode and send it to controller
                 }
@@ -104,48 +122,7 @@ namespace MessageApp
             {
                 controllerSendErrorReport(e.errorCode);
             }
-        }
-
-        /// <summary>
-        /// This method should only be externally called by the CLI version.
-        /// Takes a message as a parameter and utilises NetworkUtility to exchange keys, then transmit the message.
-        /// Errors are caught and reported to the controller,
-        /// Successful sending of the message is reported to the controller by NetworkUtility directly.
-        /// </summary>
-        /// <param name="message">The message to send</param>
-        public async void sendMessagesync(string message) //still public so that console version does not break
-        {
-            sendSocket = new Socket(IPAddress.Parse(targetIP).AddressFamily, SocketType.Stream, ProtocolType.Tcp); //create socket to handle sending
-            if (!NetworkUtility.connectSync(sendSocket, targetIP, targetPort)) //try to connect, returns bool
-            {
-                controllerSendErrorReport(TransmissionErrorCode.CliNoEndPointConnection);
-            }
-            else //successfully binded to endpoint
-            {
-                // send the client public RSA key to server as plaintext
-                NetworkUtility.transmitSync(sendSocket, Encoding.UTF8.GetBytes(CryptoUtility.getPublicKey()));
-                // receive the public RSA of the server as plaintext
-                byte[] bytes = NetworkUtility.receiveSync(sendSocket);
-                string serverPubKey = Encoding.UTF8.GetString(bytes);
-
-                try
-                {
-                    //async version
-                    NetworkUtility.RSATransmit2(sendSocket, Encoding.UTF8.GetBytes(message), serverPubKey, confirmSendSuccess);
-
-                    //send it via NetworkUtility
-                    //NetworkUtility.RSATransmit(sendSocket, Encoding.UTF8.GetBytes(message), serverPubKey, confirmSendSuccess);
-                }
-                catch (NetworkUtilityException e)
-                {
-                    controllerSendErrorReport(e.errorCode); //extract TransmissionErrorCode and send it to controller
-                }
-            }
-
-        }
-
-        
-
+        }     
         
 
         //returns currentMessage to controller and confirms that it was sent

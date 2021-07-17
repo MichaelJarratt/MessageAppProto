@@ -64,27 +64,38 @@ namespace MessageApp
             // receive the client public RSA key as plaintext
             byte[] bytes = NetworkUtility.receiveSync(receiveHandler); 
             String clientPubKey = Encoding.UTF8.GetString(bytes);
+            Console.WriteLine($"Client public key: {clientPubKey}");
             // send the server public RSA key to client as plaintext
             NetworkUtility.transmitSync(receiveHandler, Encoding.UTF8.GetBytes(CryptoUtility.getPublicKey()));
+            Console.WriteLine($"Server public key: {CryptoUtility.getPublicKey()}");
 
-            //set up transmission state object, will be passed back after asynchronous receive
-            BufferState transmissionState = new BufferState();
-            transmissionState.cryptographyType = CryptographyType.RSA; //RSA encrypted transmission
-            transmissionState.keyString = clientPubKey;
-            transmissionState.callback = asyncReceiveCallback;
-
-            //asynchronously receive transmission. data is sent to completeReceive via callback.
-            //NetworkUtility.AsyncReceive(receiveHandler, transmissionState);
+            //create TransmissionState object and fill with needed items
             TransmissionState transState = new TransmissionState();
+            transState.cryptographyType = CryptographyType.RSA;
             transState.socket = receiveHandler;
             transState.keyString = clientPubKey;
-            Task<TransmissionState> receiveTask = NetworkUtility.receiveAsync(transState);
 
-            transState = await receiveTask;
-            Console.WriteLine("Received bytes: "+ transState.totalBytesReceived);
-            Console.WriteLine(transState.bytes[0] + " " + transState.bytes[1201]); //transState.bytes.Length-1]);
-            completeReceive2(transState);
+            //Task<TransmissionState> receiveTask = NetworkUtility.receiveAsync(transState);
+            //transState = await receiveTask;
 
+            transState.bytes = NetworkUtility.receiveSync(receiveHandler);
+
+            Tuple<byte[], byte[]> sigAndData = TransmissionFormatter.decodeRSATransmission(transState); //extract signature and data
+
+            try
+            {
+                string messageString = decryptRSA(sigAndData, transState.keyString); //validate and decrypt transmission
+                NetworkUtility.transmitSync(transState.socket, Encoding.UTF8.GetBytes("received")); //confirm successful receive
+
+                string senderIP = ((System.Net.IPEndPoint)transState.socket.RemoteEndPoint).Address.ToString(); //pretty dumb, have to cast socket.remoteEndPoint to IPEndPoint to access the Address attribute 
+                Message message = new Message(messageString, senderIP); //creates message object with content and IP of the sender
+                controllerReturn(message);
+            }
+            catch(NetworkUtilityException e)
+            {
+                // TODO: define more appropriate Exception, just needs to have a TransmissionErrorCode field.
+                reportReceiveError(e.errorCode);
+            }
             
             //BufferState bufferState = new BufferState(); //creates new bit buffer for receiving socket
             //bufferState.socket = receiveHandler; //places socket this buffer is for inside so it can be passed in the IAsyncResult
@@ -92,11 +103,52 @@ namespace MessageApp
             //receiveHandler.BeginReceive(bufferState.bytes, 0, BufferState.bufferSize, SocketFlags.None, new AsyncCallback(receiveBytes), bufferState); //stores received bytes in bufferState.bytes
         }
 
+        private string decryptRSA(Tuple<byte[],byte[]> sigAndData, string senderPubKey)
+        {
+            byte[] signature = sigAndData.Item1;
+            byte[] data = sigAndData.Item2;
+            return decryptRSA(signature, data, senderPubKey);
+        }
+
+        private string decryptRSA(byte[] signature, byte[] data, string senderPubKey)
+        {
+            Console.WriteLine(data.Length);
+            string messageString;
+            bool validSignature;
+            try //try to decrypt data
+            {
+                messageString = CryptoUtility.RSADecryptData(data, CryptoUtility.getPrivateKey());
+            }
+            catch(Exception e)
+            {
+                throw new NetworkUtilityException(TransmissionErrorCode.ServDecOrValError);
+            }
+
+            try //try to validate signature
+            {
+                validSignature = CryptoUtility.validateSignature(Encoding.UTF8.GetBytes(messageString), signature, senderPubKey);
+            }
+            catch (Exception e)
+            { 
+                // TODO: create enums or both decryption and validation errors (now they can be distinguished)
+                throw new NetworkUtilityException(TransmissionErrorCode.ServDecOrValError);
+            }
+
+            if(!validSignature) //check signature validity
+            {
+                throw new NetworkUtilityException(TransmissionErrorCode.ServDecOrValError);
+            }
+            else
+            {
+                return messageString;
+            }
+        }
+
         private void completeReceive2(TransmissionState bufferState)
         {
             //extract signature length and message length
-            bufferState.signatureLength = NetworkUtility.lengthBytesToInt(new ArraySegment<Byte>(bufferState.bytes, 2, 2).ToArray());
-            bufferState.messageLength = NetworkUtility.lengthBytesToInt(new ArraySegment<Byte>(bufferState.bytes, 4, 2).ToArray());
+            bufferState.signatureLength = TransmissionFormatter.lengthBytesToInt(new ArraySegment<Byte>(bufferState.bytes, 2, 2).ToArray());
+            bufferState.messageLength = TransmissionFormatter.lengthBytesToInt(new ArraySegment<Byte>(bufferState.bytes, 4, 2).ToArray());
 
             //get signature bytes from bufferState
             Byte[] signatureBytes = new ArraySegment<Byte>(bufferState.bytes, 6, bufferState.signatureLength).ToArray();
@@ -214,8 +266,8 @@ namespace MessageApp
         private void completeReceive(BufferState bufferState)
         {
             //extract signature length and message length
-            bufferState.signatureLength = NetworkUtility.lengthBytesToInt(new ArraySegment<Byte>(bufferState.bytes, 2, 2).ToArray());
-            bufferState.messageLength = NetworkUtility.lengthBytesToInt(new ArraySegment<Byte>(bufferState.bytes, 4, 2).ToArray());
+            bufferState.signatureLength = TransmissionFormatter.lengthBytesToInt(new ArraySegment<Byte>(bufferState.bytes, 2, 2).ToArray());
+            bufferState.messageLength = TransmissionFormatter.lengthBytesToInt(new ArraySegment<Byte>(bufferState.bytes, 4, 2).ToArray());
 
             //get signature bytes from bufferState
             Byte[] signatureBytes = new ArraySegment<Byte>(bufferState.bytes, 6, bufferState.signatureLength).ToArray();
