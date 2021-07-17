@@ -107,12 +107,17 @@ namespace MessageApp
         {
             byte[] signature = sigAndData.Item1;
             byte[] data = sigAndData.Item2;
+
+            Console.WriteLine($"Signature: \n {System.Convert.ToBase64String(signature)}");
+            Console.WriteLine($"Data: \n {System.Convert.ToBase64String(data)}");
+
             return decryptRSA(signature, data, senderPubKey);
         }
 
         private string decryptRSA(byte[] signature, byte[] data, string senderPubKey)
         {
             Console.WriteLine(data.Length);
+
             string messageString;
             bool validSignature;
             try //try to decrypt data
